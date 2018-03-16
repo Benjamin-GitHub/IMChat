@@ -1,0 +1,24 @@
+{
+  "code": 0,
+  "msg": "",
+  "data": {
+    "mine": {
+      "username": "张三",
+      "id": "100000",
+      "status": "online",
+      "avatar": "//res.layui.com/images/fly/avatar/00.jpg"
+    },
+    "group": [
+      {
+        "groupname": "异常工单讨论组",
+        "id": "101",
+        "avatar": "//tva2.sinaimg.cn/crop.0.0.199.199.180/005Zseqhjw1eplix1brxxj305k05kjrf.jpg"
+      },
+      {
+        "groupname": "业务流程讨论组",
+        "id": "102",
+        "avatar": "//tva2.sinaimg.cn/crop.0.0.199.199.180/005Zseqhjw1eplix1brxxj305k05kjrf.jpg"
+      }
+    ]
+  }
+}

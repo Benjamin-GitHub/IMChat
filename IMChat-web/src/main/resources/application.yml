@@ -1,0 +1,208 @@
+login:
+  oauth:
+    check: false
+app:
+  oa:
+    url-prefix: http://oa-api
+  plugin:
+    url-prefix: http://plugin-api
+  web:
+    url-prefix: http://webApp
+  iom:
+    url-prefix: http://iomApp
+  oaas:
+    url-prefix: http://oaasApp
+  oauth:
+    url-prefix: http://oauth-api
+  gid:
+    url-prefix: http://gidApp
+  flow:
+    url-prefix: http://flowApp
+  ruleEngine:
+    url-prefix: http://ruleEngineApp
+  intf:
+    url-prefix: http://intfApp
+  filesys:
+    url-prefix: http://fileApp
+  workFlow:
+    url-prefix: http://workflow-engine
+  atomic:
+    url-prefix: http://yihe-captree-server
+  dciserver:
+    url-prefix: http://yihe-dci-server
+  netgw:
+    bridge:
+      url-prefix: http://119.23.142.66:9080
+    url-prefix: http://127.0.0.1:9001/netgw/
+  netgw-js:
+    url-prefix: http://127.0.0.1:9001/netgw/
+  speed:
+    download-url: http://192.168.10.17:8091/download/speedtest1.bin
+
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: false
+        isolation:
+          thread:
+            timeoutInMilliseconds: 30000
+
+spring:
+  thymeleaf:
+    cache: false
+#  redis:
+#    host: localhost
+#    port: 6379
+#    database: 0
+#  datasource:
+#      driver-class-name: org.h2.Driver
+#      url: jdbc:h2:tcp://localhost/~/Documents/temp;Mode=MYSQL;DB_CLOSE_ON_EXIT=FALSE
+#      username: soc
+#      password: soc
+#      url: jdbc:h2:mem:soc;Mode=Oracle
+#  datasource:
+#      driver-class-name: com.mysql.jdbc.Driver
+#      url: jdbc:mysql://192.168.100.85:3307/common?characterEncoding=UTF-8
+#      username: root
+#      password: 123456
+#      dbcp2:
+#  #      driver-class-name: org.h2.Driver
+#  #      url: jdbc:h2:mem:soc;Mode=MYSQL;DB_CLOSE_ON_EXIT=FALSE
+#  #      url: jdbc:h2:tcp://localhost/~/Documents/temp;Mode=MYSQL;DB_CLOSE_ON_EXIT=FALSE
+#  #      username: soc
+#  #      password: soc
+#        default-query-timeout: 5
+#        initial-size: 1
+#        max-total: 10
+  jpa:
+      show-sql: true
+      hibernate:
+        ddl-auto: none
+  #     database-platform: org.hibernate.dialect.H2Dialect
+  #      database: h2
+      database-platform: org.hibernate.dialect.MySQL5Dialect
+      database: mysql
+  session:
+    store-type : none
+  application:
+    name: webApp
+  http:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+      enabled: true
+#  resources:
+#    cache-period: 600
+#    chain:
+#      strategy:
+#        fixed:
+#          enabled: true
+#          paths: /static/**
+#          version: test
+#        content:
+#          enabled: true
+#      html-application-cache: true
+#      cache: true
+#  redis:
+##    host: 120.77.8.180
+##    port: 6379
+#    database: 0
+#    password: Re_16_dis
+#    pool:
+#      max-idle: 8
+#      min-idle: 0
+#      max-active: 8
+#      max-wait: -1
+#    sentinel:
+#      master: redis_6379
+#      nodes: 120.77.8.180:16379,120.77.8.180:26379,120.77.8.180:36379
+
+server:
+  session:
+    timeout: 3000
+  port: 9001
+  tomcat:
+    max-connections: 60
+    max-threads: 60
+    accept-count: 60
+security:
+  basic:
+    enabled: false
+
+
+#eureka:
+#  instance:
+#    #prefer-ip-address: true
+#    preferIpAddress: true
+#    instance-id: ${spring.cloud.client.ipAddress}:${server.port}
+#    leaseRenewalIntervalInSeconds: 1
+#    leaseExpirationDurationInSeconds: 2
+#  client:
+#    service-url:
+#      defaultZone: http://192.168.100.85:10080/eureka/
+zuul:
+  host:
+    max-per-route-connections: 20
+    max-total-connections: 200
+  routes:
+    iom:
+      path: /iomApp/**
+      #serviceId: iomApp
+      #url: http://192.168.100.85:9003
+      url: http://127.0.0.1:9003
+    oaas:
+      path: /oaasApp/**
+      #serviceId: oaasApp
+      url: http://192.168.100.85:9002
+    gid:
+      path: /gidApp/**
+      serviceId: gidApp
+      #url: http://192.168.100.85:9004
+    flow:
+      path: /flowApp/**
+      serviceId: flowApp
+      #url: http://192.168.100.85:9005
+    ruleEngine:
+      path: /ruleEngineApp/**
+      serviceId: ruleEngineApp
+      #url: http://192.168.100.85:9005
+    intf:
+      path: /intfApp/**
+      serviceId: intfApp
+      #url: http://192.168.100.85:9010
+      #url: http://127.0.0.1:9010
+    filesys:
+      path: /fileApp/**
+      serviceId: fileApp
+      #url: http://192.168.100.85:9008
+    workFlow:
+      path: /workflow-engine/**
+      serviceId: workflow-engine
+    atomic:
+      path: /yihe-captree-server/**
+      serviceId: yihe-captree-server
+    dciserver:
+      path: /yihe-dci-server/**
+      serviceId: yihe-dci-server
+
+api:
+  debugMode: true
+  request:
+    encrypted: true
+    getMethod:
+      encrypted: false
+  response:
+    encrypted: false
+  appKey:
+
+ribbon:
+  ReadTimeout: 100000
+  ConnectTimeout: 100000
+
+#logging:
+  #config:classpath:logback.xml
+  #path:/Firelog
+uploadpath: /home/fire/platformWeb-1.0-SNAPSHOT/classes/static/upload/
+uploadpathWindows: D:\test

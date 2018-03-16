@@ -1,0 +1,154 @@
+﻿<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="shortcut icon" href="./resources/images/cloud.ico"/>
+<title>翼翮业务编排模块</title>
+
+
+
+ <!--[if LTE IE 9]>
+  <script type="text/javascript" src="resources/html5shiv/html5shiv-r29.min.js"></script>
+  <script type="text/javascript" src="resources/es5-shim-4.1.13/es5-shim.min.js"></script>
+<![endif]-->
+<script src="/bootstrap/js/bootstrap.min.js"></script>
+
+
+ <!--[if LTE IE 9]>
+ 	<script type="text/javascript">
+ 	 	WEB_SOCKET_SWF_LOCATION = "WebSocketMain.swf";
+    	WEB_SOCKET_DEBUG = false;
+	</script>
+    <script type="text/javascript" src="./resources/swfobject/swfobject.js"></script>
+	<script type="text/javascript" src="./resources/swfobject/web_socket.js"></script>
+<![endif]-->
+	
+
+
+<!-- base标签指定了资源默认的加载路径,会影响requireJS入口路径，不能添加 -->
+
+<link rel="stylesheet"
+	href="./resources/fish/fish-desktop/css/fish-desktop-portal.min.css" />
+	
+
+	
+<link rel="stylesheet"
+	href="./resources/font-awesome-4.3.0/css/font-awesome.min.css" />
+
+<link rel="stylesheet"
+	href="./resources/fish/fish-desktop/third-party/fileupload/fileupload.css" />
+
+<link rel="stylesheet" href="./resources/fonts-icon/fonts-icon.css" />
+
+<link rel="stylesheet" href="./resources/fonts-icon-plus-v1/fonts-icon-plus-v1.css" />
+	
+<link rel="stylesheet" href="./resources/fish/proj-plugins/css/monitorgrid.css?v=1506670924271" />
+
+<script type="text/javascript"
+	src="./resources/fish/fish-desktop/js/fish-desktop-all.js"></script>
+
+
+
+<script type="text/javascript"
+	src="./resources/modernizr/modernizr.min.js"></script>
+
+
+<script type="text/javascript"
+	src="./resources/echarts/echarts.min.js?v=3.1"></script>
+
+<script type="text/javascript"
+        src="./resources/echarts/map/js/china.js"></script>
+<script type="text/javascript"
+	src="./resources/fish/fish-desktop/locale/fish-desktop-locale.zh.min.js"></script>
+<script type="text/javascript"
+	src="./resources/fish/fish-desktop/locale/fish-desktop-locale.en.min.js"></script>
+<script type="text/javascript"
+	src="./resources/fish/fish-desktop/third-party/fileupload/fish.fileupload.js"></script>
+
+
+<link rel="stylesheet" href="./resources/gridster/jquery.gridster.min.css" />
+<script type="text/javascript"
+	src="./resources/gridster/jquery.gridster.min.js"></script>
+
+	
+<link rel="stylesheet" href="./resources/fish/fish-desktop/third-party/contextmenu/contextmenu.css" />
+
+<script type="text/javascript"
+	src="./resources/fish/fish-desktop/third-party/contextmenu/fish.contextmenu.js"></script>
+
+
+
+	
+<script type="text/javascript"
+	src="./resources/jquery-contextMenu/jquery.ui.position.min.js"></script>
+
+<link rel="stylesheet" href="./resources/jquery-contextMenu/jquery.contextMenu.min.css" />
+
+<script type="text/javascript"
+	src="./resources/jquery-contextMenu/jquery.contextMenu.min.js"></script>
+
+<script th:inline="javascript">
+	/*<![CDATA[*/
+		var currentUser_ = /*[[${currentUser}]]*/"";
+		var currentJob_ = /*[[${currentJob}]]*/"";
+		var userMenus_ = /*[[${userMenus}]]*/"";
+		var currentPrivs_ = /*[[${currentPrivs}]]*/"";
+		var allQualifiedPrivs_ = /*[[${allQualifiedPrivs}]]*/"";
+		var qualifiedJobs_ = /*[[${qualifiedJobs}]]*/"";
+		var token_ = /*[[${token}]]*/"";
+		var currentCustInfo_ = /*[[${currentCustInfo}]]*/"";
+		var userJobs_ = /*[[${userJobs}]]*/"";
+		var currentIP_ = /*[[${currentIP}]]*/"";
+		var sessionId = /*[[${sessionId}]]*/"";
+		
+	/*]]>*/
+</script>
+
+<script src="/mainCore.js"></script>
+
+
+
+	
+
+
+	
+
+
+	
+
+
+
+
+
+	
+<script type="text/javascript"
+	src="./resources/fish/proj-plugins/cloud-destop-shim.js?v=1506670924271"></script>
+
+<script type="text/javascript"
+	src="./resources/fish/fish-desktop/js/fish-desktop-all-yihe.js"></script>
+
+
+<!--<script type="text/javascript"
+	src="./resources/fish/fish-desktop/js/fish-desktop-require.js?v=1506670924271"
+	data-main="modules/common/main"></script>-->
+
+
+	
+
+
+
+<link rel="stylesheet"
+	href="modules/common/styles/cloud-proj-all.css?v=1506670924293"/>
+
+
+
+<!--[if LTE IE 8]>
+		<script type="text/javascript" src="resources/fish/fish/libs/bootstrap/respond.js"></script>
+    <![endif]-->
+</head>
+<body class="skin-blue-light sidebar-mini">
+
+</body>
+</html>

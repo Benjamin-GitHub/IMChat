@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_Cloud" version="3.0">
+	<display-name>Cloud-web</display-name>
+	<listener>
+		<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
+	</listener>
+	<!-- spring主配置 -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>classpath:/cfg/spring/applicationContext.xml</param-value>
+	</context-param>
+	<context-param>
+		<param-name>webAppRootKey</param-name>
+		<param-value>CloudWeb.root</param-value>
+	</context-param>
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+	<listener>
+		<listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
+	</listener>
+	<!-- Spring 刷新Introspector防止内存泄露 --> 
+	<listener>
+		<listener-class>org.springframework.web.util.IntrospectorCleanupListener</listener-class>
+	</listener>
+	<listener>
+		<listener-class>com.ztesoft.cloud.web.session.DefaultSessionListener</listener-class>
+	</listener>
+	
+	
+	<filter>
+	    <filter-name>springSessionRepositoryFilter</filter-name>
+	    <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+	</filter>
+	<filter-mapping>
+	    <filter-name>springSessionRepositoryFilter</filter-name>
+	    <url-pattern>/*</url-pattern>
+	    <dispatcher>REQUEST</dispatcher>  
+        <dispatcher>ERROR</dispatcher> 
+        <dispatcher>FORWARD</dispatcher>   
+	</filter-mapping>
+	
+	<filter>  
+	  <filter-name>PageGZIPFilter</filter-name>  
+	  <filter-class>com.ztesoft.cloud.web.gzip.PageGZIPFilter</filter-class>   
+	</filter> 
+	
+	<filter-mapping>  
+	  <filter-name>PageGZIPFilter</filter-name>  
+	  <url-pattern>/callRemoteFunction/*</url-pattern>  
+	</filter-mapping> 
+	
+	<servlet>
+		<servlet-name>dispatcherServlet</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>classpath:cfg/spring/springMVC.xml</param-value>
+		</init-param>
+		 <init-param>
+            <param-name>throwExceptionIfNoHandlerFound</param-name>
+            <param-value>true</param-value>
+        </init-param>
+		<load-on-startup>2</load-on-startup>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>dispatcherServlet</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>     
+		<servlet-name>default</servlet-name>    
+		<url-pattern>/resources/*</url-pattern>       
+	</servlet-mapping>   
+	<servlet-mapping>     
+		<servlet-name>default</servlet-name>    
+		<url-pattern>/modules/*</url-pattern>       
+	</servlet-mapping>        
+	<servlet-mapping>         
+		<servlet-name>default</servlet-name>      
+		<url-pattern>*.js</url-pattern>      
+	</servlet-mapping>      
+	<servlet-mapping>          
+		<servlet-name>default</servlet-name>         
+		<url-pattern>*.css</url-pattern>        
+	</servlet-mapping>
+	<servlet-mapping>          
+		<servlet-name>default</servlet-name>         
+		<url-pattern>*.html</url-pattern>        
+	</servlet-mapping>
+        <servlet-mapping>          
+		<servlet-name>default</servlet-name>         
+		<url-pattern>*.swf</url-pattern>        
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>UploadServlet</servlet-name>
+		<servlet-class>com.ztesoft.cloud.common.fileupload.FileUploadServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>UploadServlet</servlet-name>
+		<url-pattern>/fileUpload</url-pattern>
+	</servlet-mapping>
+
+	 <filter>
+	  <filter-name>characterEncodingFilter</filter-name>
+	  <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+	  <init-param>
+	   <param-name>encoding</param-name>
+	   <param-value>UTF-8</param-value>
+	  </init-param>
+	  <init-param>
+	   <param-name>forceEncoding</param-name>
+	   <param-value>true</param-value>
+	  </init-param>
+	 </filter>
+	 
+	 <filter-mapping>
+	  <filter-name>characterEncodingFilter</filter-name>
+	  <url-pattern>/*</url-pattern>
+	 </filter-mapping>
+	<!-- 
+	<error-page>
+	    <error-code>404</error-code>
+	    <location>/errors/static-resources-404-handler.jsp</location>
+	</error-page> -->
+	
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+		<welcome-file>index.htm</welcome-file>
+		<welcome-file>index.jsp</welcome-file>
+		<welcome-file>default.html</welcome-file>
+		<welcome-file>default.htm</welcome-file>
+		<welcome-file>default.jsp</welcome-file>
+	</welcome-file-list>
+	<!-- spring4.0相关配置 end --> 
+</web-app>

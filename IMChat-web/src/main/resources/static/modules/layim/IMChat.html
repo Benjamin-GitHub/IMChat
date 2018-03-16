@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>IMChat</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/resources/layui/css/layui.css" media="all">
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+</head>
+<body>
+
+<style>
+    body {
+        background: url(./images/background.jpg) no-repeat;
+        background-size: cover;
+    }
+</style>
+
+<script src="/resources/layui/layui.js" charset="utf-8"></script>
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+<script>
+    var layimOptions;
+    layui.use('layim', function () {
+        var $ = layui.jquery;
+        var layim = layui.layim;
+
+        //基础配置
+        layim.config({
+            //初始化接口
+            init: {
+                url: './data/getList.json',
+                data: {}
+            },
+
+            //查看群员接口
+            members: {
+                url: './data/getMembers.json',
+                data: {}
+            },
+
+            uploadImage: {
+                url: '',  //（返回的数据格式见下文）
+                type: '' //默认post
+            },
+
+            uploadFile: {
+                url: '', //（返回的数据格式见下文）
+                type: '' //默认post
+            },
+
+            isAudio: true, //开启聊天工具栏音频
+            isVideo: true, //开启聊天工具栏视频
+
+            //扩展工具栏
+            tool: [{
+                alias: 'code'
+                , title: '代码'
+                , icon: '&#xe64e;'
+            }],
+
+            title: '我的消息', //自定义主面板最小化时的标题
+            isfriend: false, //是否开启好友
+//            isgroup: false, //是否开启群组
+//            notice: true, //是否开启桌面消息提醒，默认false
+//            voice: false, //声音提醒，默认开启，声音文件为：default.mp3
+
+            chatLog: './chatlog.html' //聊天记录页面地址，若不开启，剔除该项即可
+        });
+
+        //监听layim建立就绪
+        layim.on('ready', function (options) {
+            layimOptions = options;
+
+            //隐藏皮肤按钮
+            $('.layui-icon.layim-tool-skin').hide();
+
+            console.log(options.group);
+
+            if (options.group && options.group.length > 0) {
+                options.group[0].type = 'group';
+                options.group[0].name = options.group[0].groupname;
+                layim.chat(options.group[0]);
+            }
+        });
+
+        //监听发送消息
+        layim.on('sendMessage', function (data) {
+            var To = data.to;
+            console.log(data);
+            websocket.send(JSON.stringify(data));
+        });
+
+        //监听查看群员
+        layim.on('members', function (data) {
+            console.log(data);
+        });
+
+        //监听在线状态的切换事件
+        layim.on('online', function (status) {
+            layer.msg(status);
+        });
+
+        //监听签名修改
+        layim.on('sign', function (value) {
+            layer.msg(value);
+        });
+
+        //监听自定义工具栏点击，以添加代码为例
+        layim.on('tool(code)', function (insert) {
+            layer.prompt({
+                title: '插入代码 - 工具栏扩展示例'
+                , formType: 2
+                , shade: 0
+            }, function (text, index) {
+                layer.close(index);
+                insert('[pre class=layui-code]' + text + '[/pre]'); //将内容插入到编辑器
+            });
+        });
+
+        //监听聊天窗口的切换
+        layim.on('chatChange', function (res) {
+            var type = res.data.type;
+            console.log(res.data.id)
+            if (type === 'friend') {
+                //模拟标注好友状态
+                //layim.setChatStatus('<span style="color:#FF5722;">在线</span>');
+            } else if (type === 'group') {
+                //模拟系统消息
+                layim.getMessage({
+                    system: true
+                    , id: res.data.id
+                    , type: "group"
+                    , content: '模拟群员' + (Math.random() * 100 | 0) + '加入群聊'
+                });
+            }
+
+            refreshGroupMembers();
+        });
+
+        function refreshGroupMembers() {
+            //更新讨论组成员
+            $('.layui-show [layim-event=groupMembers]').trigger('click');
+            $('body .layim-members-list').css('display', 'none');
+            $('.layui-show [layim-event=groupMembers]').trigger('click');
+        }
+
+        var websocket = null;
+        //判断当前浏览器是否支持WebSocket
+        if ('WebSocket' in window) {
+            websocket = new WebSocket("ws://localhost:9001/websocket");
+        }
+        else {
+            alert('当前浏览器不支持websocket')
+        }
+
+        //连接发生错误的回调方法
+        websocket.onerror = function () {
+            console.log("WebSocket连接发生错误");
+        };
+
+        //连接成功建立的回调方法
+        websocket.onopen = function () {
+            console.log("WebSocket连接成功");
+        }
+
+        //接收到消息的回调方法
+        websocket.onmessage = function (res) {
+            var data = JSON.parse(res.data);
+            var obj = data.to;
+            obj.content = data.mine.content;
+
+//          layim.setChatStatus('<span style="color:#FF5722;">在线</span>');
+            layim.getMessage(obj);
+        }
+
+        //连接关闭的回调方法
+        websocket.onclose = function () {
+            console.log("WebSocket连接关闭");
+        }
+
+        //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+        window.onbeforeunload = function () {
+            websocket.close();
+        }
+    });
+</script>
+
+</body>
+</html>
