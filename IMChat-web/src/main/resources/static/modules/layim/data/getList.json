@@ -6,18 +6,18 @@
       "username": "张三",
       "id": "100000",
       "status": "online",
-      "avatar": "//res.layui.com/images/fly/avatar/00.jpg"
+      "avatar": "/modules/layim/images/default_avatar.png"
     },
     "group": [
       {
         "groupname": "异常工单讨论组",
         "id": "101",
-        "avatar": "//tva2.sinaimg.cn/crop.0.0.199.199.180/005Zseqhjw1eplix1brxxj305k05kjrf.jpg"
+        "avatar": "/modules/layim/images/default_group_avatar.png"
       },
       {
         "groupname": "业务流程讨论组",
         "id": "102",
-        "avatar": "//tva2.sinaimg.cn/crop.0.0.199.199.180/005Zseqhjw1eplix1brxxj305k05kjrf.jpg"
+        "avatar": "/modules/layim/images/default_group_avatar.png"
       }
     ]
   }

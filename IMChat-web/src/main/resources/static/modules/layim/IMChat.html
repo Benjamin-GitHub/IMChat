@@ -21,7 +21,6 @@
 <script src="/resources/layui/layui.js" charset="utf-8"></script>
 <!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
 <script>
-    var layimOptions;
     layui.use('layim', function () {
         var $ = layui.jquery;
         var layim = layui.layim;
@@ -71,13 +70,16 @@
 
         //监听layim建立就绪
         layim.on('ready', function (options) {
-            layimOptions = options;
-
             //隐藏皮肤按钮
             $('.layui-icon.layim-tool-skin').hide();
 
-            console.log(options.group);
+            //隐藏签名设置
+            $('.layui-layim-remark').hide();
 
+            //隐藏状态设置
+            $('.layui-layim-status').hide();
+
+            //默认打开一个讨论组聊天窗口
             if (options.group && options.group.length > 0) {
                 options.group[0].type = 'group';
                 options.group[0].name = options.group[0].groupname;
@@ -100,11 +102,6 @@
         //监听在线状态的切换事件
         layim.on('online', function (status) {
             layer.msg(status);
-        });
-
-        //监听签名修改
-        layim.on('sign', function (value) {
-            layer.msg(value);
         });
 
         //监听自定义工具栏点击，以添加代码为例
