@@ -98,18 +98,20 @@
 
         //监听发送消息
         layim.on('sendMessage', function (data) {
-            console.log(data);
             websocket.send(JSON.stringify(data));
+            replaceDefaultUserAvatar();
         });
 
         //监听查看群员
         layim.on('members', function (data) {
-            console.log(data);
+            replaceDefaultUserAvatar();
         });
 
         //监听聊天窗口的切换
         layim.on('chatChange', function (res) {
             refreshGroupMembers();
+            replaceDefaultUserAvatar();
+            replaceDefaultGroupAvatar();
         });
 
         function getQueryString(name) {
@@ -152,6 +154,7 @@
                 if (result.type == 'chatMessage') {
                     layim.getMessage(result.data);
                 }
+                replaceDefaultUserAvatar();
             }
 
             //连接关闭的回调方法
@@ -169,6 +172,28 @@
 
         function closeCurrentPage() {
             window.location.href = "about:blank";
+        }
+
+        function replaceDefaultUserAvatar() {
+            var defaultUrl = '/modules/layim/images/default_avatar.png';
+            var userAvatars = $('.layim-chat-user > img, .layim-members-list > li > a > img, img[class*=layim-friend], li[class*=layim-friend] > img');
+            $.each(userAvatars, function(i, avatar) {
+                var src = $(avatar).attr('src');
+                if (src == 'undefined') {
+                    $(avatar).attr('src', defaultUrl);
+                }
+            });
+        }
+
+        function replaceDefaultGroupAvatar() {
+            var defaultUrl = '/modules/layim/images/default_group_avatar.png';
+            var userAvatars = $('img[class*=layim-group], li[class*=layim-group] > img');
+            $.each(userAvatars, function(i, avatar) {
+                var src = $(avatar).attr('src');
+                if (src == 'undefined') {
+                    $(avatar).attr('src', defaultUrl);
+                }
+            });
         }
     });
 </script>
