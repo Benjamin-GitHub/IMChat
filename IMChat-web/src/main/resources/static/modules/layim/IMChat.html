@@ -26,19 +26,21 @@
         var layim = layui.layim;
         var websocket = null;
 
+        //提取username参数
         var username = getQueryString('username');
         if (!username) {
             alert("缺少username参数");
-            window.location.href = "about:blank";
+            closeCurrentPage();
         }
 
+        //ajax请求全局加上username header
         $.ajaxSetup({
             headers: {
                 username: username
             }
         });
 
-        //基础配置
+        //layim基础配置
         layim.config({
             //初始化接口
             init: {
@@ -63,13 +65,6 @@
 
             isAudio: true, //开启聊天工具栏音频
             isVideo: true, //开启聊天工具栏视频
-
-            //扩展工具栏
-            tool: [{
-                alias: 'code'
-                , title: '代码'
-                , icon: '&#xe64e;'
-            }],
 
             title: '我的消息', //自定义主面板最小化时的标题
             isfriend: false, //是否开启好友
@@ -112,23 +107,6 @@
             console.log(data);
         });
 
-        //监听在线状态的切换事件
-        layim.on('online', function (status) {
-            layer.msg(status);
-        });
-
-        //监听自定义工具栏点击，以添加代码为例
-        layim.on('tool(code)', function (insert) {
-            layer.prompt({
-                title: '插入代码 - 工具栏扩展示例'
-                , formType: 2
-                , shade: 0
-            }, function (text, index) {
-                layer.close(index);
-                insert('[pre class=layui-code]' + text + '[/pre]'); //将内容插入到编辑器
-            });
-        });
-
         //监听聊天窗口的切换
         layim.on('chatChange', function (res) {
             refreshGroupMembers();
@@ -149,19 +127,18 @@
         }
 
         function initWebSocket() {
-
             //判断当前浏览器是否支持WebSocket
             if ('WebSocket' in window) {
                 websocket = new WebSocket("ws://localhost:9007/websocket/" + username);
             }
             else {
                 alert('当前浏览器不支持websocket');
-                return;
+                closeCurrentPage();
             }
 
             //连接发生错误的回调方法
             websocket.onerror = function () {
-                console.log("WebSocket连接发生错误");
+                alert("WebSocket连接发生错误");
             };
 
             //连接成功建立的回调方法
@@ -178,14 +155,20 @@
             }
 
             //连接关闭的回调方法
-            websocket.onclose = function () {
-                console.log("WebSocket连接关闭");
+            websocket.onclose = function (isNormal) {
+                if (isNormal != true) {
+                    alert("WebSocket连接意外关闭，请刷新页面重连");
+                }
             }
 
             //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
             window.onbeforeunload = function () {
-                websocket.close();
+                websocket.close(true);
             }
+        }
+
+        function closeCurrentPage() {
+            window.location.href = "about:blank";
         }
     });
 </script>
