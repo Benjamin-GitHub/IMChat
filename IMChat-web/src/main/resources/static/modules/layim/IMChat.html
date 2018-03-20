@@ -16,6 +16,21 @@
         background: url(./images/background.jpg) no-repeat;
         background-size: cover;
     }
+
+    .msg-count-icon {
+        position: absolute;
+        font-size: 12px !important;
+        border: 1px solid red;
+        width: 16px !important;;
+        padding: 0px !important;;
+        line-height: 16px;
+        text-align: center;
+        border-radius: 1000px;
+        background-color: red;
+        color: white;
+        bottom: 8px;
+        left: 28px;
+    }
 </style>
 
 <input id="uploadVideo" style="filter:alpha(opacity=0);opacity:0;width: 0;height: 0;display: none;"/>
@@ -137,6 +152,9 @@
             refreshGroupMembers();
             replaceDefaultUserAvatar();
             replaceDefaultGroupAvatar();
+
+            //消除未读提示
+            $('.layim-chatlist-group'+res.data.id+'.layim-this').children('.msg-count-icon').remove();
         });
 
         //监听自定义工具栏点击(发送视频)
@@ -224,7 +242,23 @@
             websocket.onmessage = function (event) {
                 var result = JSON.parse(event.data);
                 if (result.type == 'chatMessage') {
-                    layim.getMessage(result.data);
+                    var data = result.data;
+                    layim.getMessage(data);
+
+                    //打开多个聊天窗口时，非活动窗口有消息的话添加未读提示
+                    if ($('.layim-chat-list').is(':visible') && data.type == 'group') {
+                        var chatListGroup = $('.layim-chatlist-group' + data.id)[0];
+                        if (chatListGroup && !$(chatListGroup).hasClass('layim-this')) {
+                            var msgCountIcon = $(chatListGroup).children('.msg-count-icon')[0];
+                            if (msgCountIcon) {
+                                var count = $(msgCountIcon).text();
+                                count++;
+                                $(msgCountIcon).text(count);
+                            } else {
+                                $(chatListGroup).prepend('<span class="msg-count-icon">1</span>');
+                            }
+                        }
+                    }
                 }
                 replaceDefaultUserAvatar();
             }
