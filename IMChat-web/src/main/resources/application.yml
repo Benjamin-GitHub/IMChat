@@ -2,42 +2,8 @@ login:
   oauth:
     check: false
 app:
-  oa:
-    url-prefix: http://oa-api
-  plugin:
-    url-prefix: http://plugin-api
-  web:
-    url-prefix: http://webApp
   iom:
     url-prefix: http://iomApp
-  oaas:
-    url-prefix: http://oaasApp
-  oauth:
-    url-prefix: http://oauth-api
-  gid:
-    url-prefix: http://gidApp
-  flow:
-    url-prefix: http://flowApp
-  ruleEngine:
-    url-prefix: http://ruleEngineApp
-  intf:
-    url-prefix: http://intfApp
-  filesys:
-    url-prefix: http://fileApp
-  workFlow:
-    url-prefix: http://workflow-engine
-  atomic:
-    url-prefix: http://yihe-captree-server
-  dciserver:
-    url-prefix: http://yihe-dci-server
-  netgw:
-    bridge:
-      url-prefix: http://119.23.142.66:9080
-    url-prefix: http://127.0.0.1:9001/netgw/
-  netgw-js:
-    url-prefix: http://127.0.0.1:9001/netgw/
-  speed:
-    download-url: http://192.168.10.17:8091/download/speedtest1.bin
 
 hystrix:
   command:
@@ -90,8 +56,8 @@ spring:
     name: webApp
   http:
     multipart:
-      max-file-size: 20MB
-      max-request-size: 20MB
+      max-file-size: 100MB
+      max-request-size: 1000MB
       enabled: true
 #  resources:
 #    cache-period: 600
@@ -152,57 +118,10 @@ zuul:
       #serviceId: iomApp
       #url: http://192.168.100.85:9003
       url: http://127.0.0.1:9003
-    oaas:
-      path: /oaasApp/**
-      #serviceId: oaasApp
-      url: http://192.168.100.85:9002
-    gid:
-      path: /gidApp/**
-      serviceId: gidApp
-      #url: http://192.168.100.85:9004
-    flow:
-      path: /flowApp/**
-      serviceId: flowApp
-      #url: http://192.168.100.85:9005
-    ruleEngine:
-      path: /ruleEngineApp/**
-      serviceId: ruleEngineApp
-      #url: http://192.168.100.85:9005
-    intf:
-      path: /intfApp/**
-      serviceId: intfApp
-      #url: http://192.168.100.85:9010
-      #url: http://127.0.0.1:9010
-    filesys:
-      path: /fileApp/**
-      serviceId: fileApp
-      #url: http://192.168.100.85:9008
-    workFlow:
-      path: /workflow-engine/**
-      serviceId: workflow-engine
-    atomic:
-      path: /yihe-captree-server/**
-      serviceId: yihe-captree-server
-    dciserver:
-      path: /yihe-dci-server/**
-      serviceId: yihe-dci-server
-
-api:
-  debugMode: true
-  request:
-    encrypted: true
-    getMethod:
-      encrypted: false
-  response:
-    encrypted: false
-  appKey:
 
 ribbon:
   ReadTimeout: 100000
   ConnectTimeout: 100000
 
-#logging:
-  #config:classpath:logback.xml
-  #path:/Firelog
-uploadpath: /home/fire/platformWeb-1.0-SNAPSHOT/classes/static/upload/
-uploadpathWindows: D:\test
+imChat:
+  serverAddr: localhost:9007

@@ -40,26 +40,36 @@
             }
         });
 
+        //同步查询服务端地址
+        var imChatServerAddr = '';
+        $.ajax({
+            type: "get",
+            url: "/imChat/getIMChatServerAddr",
+            cache: false,
+            async: false,
+            success: function(result){
+                imChatServerAddr = result;
+            }
+        });
+
         //layim基础配置
         layim.config({
             //初始化接口
             init: {
-                url: 'http://localhost:9007/imuser/show',
-                data: {}
+                url: "http://" + imChatServerAddr + '/imuser/show'
             },
 
             //查看群员接口
             members: {
-                url: 'http://localhost:9007/imuser/list',
-                data: {}
+                url: "http://" + imChatServerAddr + '/imuser/list'
             },
 
             uploadImage: {
-                url: 'http://localhost:9007/upload/file'
+                url: "http://" + imChatServerAddr + '/upload/file'
             },
 
             uploadFile: {
-                url: 'http://localhost:9007/upload/file'
+                url: "http://" + imChatServerAddr + '/upload/file'
             },
 
             isAudio: true, //开启聊天工具栏音频
@@ -130,7 +140,7 @@
         function initWebSocket() {
             //判断当前浏览器是否支持WebSocket
             if ('WebSocket' in window) {
-                websocket = new WebSocket("ws://localhost:9007/websocket/" + username);
+                websocket = new WebSocket("ws://" + imChatServerAddr + "/websocket/" + username);
             }
             else {
                 alert('当前浏览器不支持websocket');
