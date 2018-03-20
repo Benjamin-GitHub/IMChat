@@ -181,6 +181,11 @@
             $('#uploadAudio').click();
         });
 
+        //绑定播放视频事件
+        $('body').on('click', '.layui-layim-video[layim-event=playVideo]', function() {
+            $('video').attr('controls', 'controls');
+        });
+
         function getQueryString(name) {
             var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
             var r = window.location.search.substr(1).match(reg);
