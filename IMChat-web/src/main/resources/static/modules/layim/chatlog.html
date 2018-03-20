@@ -40,56 +40,75 @@
 <script src="/resources/layui/layui.js"></script>
 <script>
     layui.use(['layim', 'laypage'], function(){
-        var layim = layui.layim
-                ,layer = layui.layer
-                ,laytpl = layui.laytpl
-                ,$ = layui.jquery
-                ,laypage = layui.laypage;
+        var layim = layui.layim;
+        var layer = layui.layer;
+        var laytpl = layui.laytpl;
+        var $ = layui.jquery;
+        var laypage = layui.laypage;
 
-        //聊天记录的分页此处不做演示，你可以采用laypage，不了解的同学见文档：http://www.layui.com/doc/modules/laypage.html
+        var type = getQueryString('type');
+        var id = getQueryString('id');
+        var size = 10;
+        var chatLogData = [];
 
+        $.getJSON('http://localhost:9007/immessage/list/'+id+'/'+type+'/-1/'+size, function(result) {
+            chatLogData = result.data;
+            $.each(chatLogData, function(i, obj) {
+                obj.cid = obj.id;
+                obj.id = obj.userId;
+            });
 
-        //开始请求聊天记录
-        var param =  location.search //获得URL参数。该窗口url会携带会话id和type，他们是你请求聊天记录的重要凭据
+            var html = laytpl(LAY_tpl.value).render({
+                data: chatLogData
+            });
+            $('#LAY_view').html(html);
 
-        //实际使用时，下述的res一般是通过Ajax获得，而此处仅仅只是演示数据格式
-                ,res = {
-                    code: 0
-                    ,msg: ''
-                    ,data: [{
-                        username: '纸飞机'
-                        ,id: 100000
-                        ,avatar: '//tva3.sinaimg.cn/crop.0.0.512.512.180/8693225ajw8f2rt20ptykj20e80e8weu.jpg'
-                        ,timestamp: 1480897882000
-                        ,content: 'face[抱抱] face[心] 你好啊小美女'
-                    }, {
-                        username: 'Z_子晴'
-                        ,id: 108101
-                        ,avatar: '//tva3.sinaimg.cn/crop.0.0.512.512.180/8693225ajw8f2rt20ptykj20e80e8weu.jpg'
-                        ,timestamp: 1480897892000
-                        ,content: '你没发错吧？face[微笑]'
-                    },{
-                        username: 'Z_子晴'
-                        ,id: 108101
-                        ,avatar: '//tva3.sinaimg.cn/crop.0.0.512.512.180/8693225ajw8f2rt20ptykj20e80e8weu.jpg'
-                        ,timestamp: 1480897898000
-                        ,content: '你是谁呀亲。。我爱的是贤心！我爱的是贤心！我爱的是贤心！重要的事情要说三遍~'
-                    },{
-                        username: 'Z_子晴'
-                        ,id: 108101
-                        ,avatar: '//tva3.sinaimg.cn/crop.0.0.512.512.180/8693225ajw8f2rt20ptykj20e80e8weu.jpg'
-                        ,timestamp: 1480897908000
-                        ,content: '注意：这些都是模拟数据，实际使用时，需将其中的模拟接口改为你的项目真实接口。\n该模版文件所在目录（相对于layui.js）：\n/css/modules/layim/html/chatlog.html'
-                    }]
-                }
-
-        //console.log(param)
-
-        var html = laytpl(LAY_tpl.value).render({
-            data: res.data
+            setTimeout(function() {
+                window.scrollTo(0, document.body.scrollHeight);
+            }, 50);
         });
-        $('#LAY_view').html(html);
 
+        $(window).scroll(function () {
+            if ($(window).scrollTop() == 0) {
+                if (chatLogData[0] && chatLogData[0].cid) {
+                    var msgId = chatLogData[0].cid;
+
+                    var index = layer.load(0, {
+                        shade: [0.5,'#fff'],
+                        time: 10*1000
+                    });
+                    $.getJSON('http://localhost:9007/immessage/list/'+id+'/'+type+'/'+msgId+'/'+size, function(result) {
+                        chatLogData = result.data;
+                        $.each(chatLogData, function(i, obj) {
+                            obj.cid = obj.id;
+                            obj.id = obj.userId;
+                        });
+
+                        var scrollPosition =  $(document).height();
+
+                        var html = laytpl(LAY_tpl.value).render({
+                            data: chatLogData
+                        });
+                        $('#LAY_view').prepend(html);
+
+                        setTimeout(function() {
+                            window.scrollTo(0, $(document).height() - scrollPosition);
+                        }, 50);
+
+                        setTimeout(function() {
+                            layer.close(index);
+                        }, 300);
+                    });
+                }
+            }
+        });
+
+        function getQueryString(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]);
+            return null;
+        }
     });
 </script>
 </body>
