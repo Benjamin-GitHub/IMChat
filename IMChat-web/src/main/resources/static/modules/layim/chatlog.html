@@ -63,6 +63,8 @@
             });
             $('#LAY_view').html(html);
 
+            replaceDefaultUserAvatar();
+
             setTimeout(function() {
                 window.scrollTo(0, document.body.scrollHeight);
             }, 50);
@@ -91,6 +93,8 @@
                         });
                         $('#LAY_view').prepend(html);
 
+                        replaceDefaultUserAvatar();
+
                         setTimeout(function() {
                             window.scrollTo(0, $(document).height() - scrollPosition);
                         }, 50);
@@ -108,6 +112,17 @@
             var r = window.location.search.substr(1).match(reg);
             if (r != null) return unescape(r[2]);
             return null;
+        }
+
+        function replaceDefaultUserAvatar() {
+            var defaultUrl = '/modules/layim/images/default_avatar.png';
+            var userAvatars = $('.layim-chat-user > img, .layim-members-list > li > a > img, img[class*=layim-friend], li[class*=layim-friend] > img');
+            $.each(userAvatars, function(i, avatar) {
+                var src = $(avatar).attr('src');
+                if (src == 'undefined') {
+                    $(avatar).attr('src', defaultUrl);
+                }
+            });
         }
     });
 </script>
