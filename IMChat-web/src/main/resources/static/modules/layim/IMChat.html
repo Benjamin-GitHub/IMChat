@@ -235,6 +235,7 @@
                     };
 
                     req.open("POST", uploadFileUrl);
+                    req.setRequestHeader('username', username);
                     req.send(data);
                 });
 
