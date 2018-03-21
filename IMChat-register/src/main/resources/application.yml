@@ -1,0 +1,32 @@
+spring:
+  application:
+    # 应用名称
+    name: IMChat-register
+  session:
+    store-type: none
+  jmx:
+    default-domain: register
+endpoints:
+  jmx:
+    domain: register
+server:
+  # 端口
+  port: 10080
+eureka:
+  instance:
+    # 终端名称
+    hostname: localhost
+  client:
+    # 服务端不注册自己
+    register-with-eureka: false
+    fetch-registry: false
+#    serviceUrl:
+#      defaultZone: http://localhost:10080/eureka/
+  server:
+    # 等待时间
+    enableSelfPreservation: false
+    wait-time-in-ms-when-sync-empty: 0
+    enable-self-preservation: false
+security:
+  basic:
+    enabled: false
