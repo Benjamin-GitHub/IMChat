@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>IMChatMobile</title>
     <link rel="stylesheet" href="/resources/layui/css/layui.mobile.css" media="all">
 </head>
@@ -9,30 +10,155 @@
 <script src="/resources/layui/layui.js"></script>
 <script>
     layui.use('mobile', function(){
+        var $ = layui.zepto;
         var mobile = layui.mobile;
         var layim = mobile.layim;
+        var websocket = null;
 
-        //基础配置
-        layim.config({
-            init: {
-                //设置我的基础信息
-                mine: {
-                    "username": "佟丽娅" //我的昵称
-                    ,"id": 123 //我的ID
-                    ,"avatar": "http://tp4.sinaimg.cn/1345566427/180/5730976522/0" //我的头像
-                }
-                //好友列表数据
-                ,friend: [] //见下文：init数据格式
+        //提取username参数
+        var username = getQueryString('username');
+        if (!username) {
+            alert("缺少username参数");
+            closeCurrentPage();
+        }
+
+        //ajax请求全局加上username header
+        $.ajaxSettings = $.extend($.ajaxSettings, {
+            headers: {
+                username: username
             }
         });
 
-        //创建一个会话
-        layim.chat({
-            id: 111111
-            ,name: '许闲心'
-            ,type: 'kefu' //friend、group等字符，如果是group，则创建的是群聊
-            ,avatar: 'http://tp1.sinaimg.cn/1571889140/180/40030060651/1'
+        //同步查询服务端地址
+        var imChatServerAddr = '';
+        $.ajax({
+            type: "get",
+            url: "/imChat/getIMChatServerAddr",
+            cache: false,
+            async: false,
+            success: function(result){
+                imChatServerAddr = result;
+            }
         });
+        var uploadFileUrl = "http://" + imChatServerAddr + '/upload/file';
+
+        //查询基础信息
+        var initData = {};
+        $.ajax({
+            type: "get",
+            url: "http://" + imChatServerAddr + '/imuser/show',
+            cache: false,
+            async: false,
+            success: function(result){
+                initData = JSON.parse(result).data;
+            }
+        });
+
+        //基础配置
+        layim.config({
+            //初始化接口
+            init: initData,
+
+            uploadImage: {
+                url: uploadFileUrl
+            },
+
+            uploadFile: {
+                url: uploadFileUrl
+            },
+
+            title: 'IMChatMobile',
+            isNewFriend: false,
+            isgroup: true,
+            notice: true
+        });
+
+        //监听发送消息
+        layim.on('sendMessage', function (data) {
+            websocket.send(JSON.stringify(data));
+            replaceDefaultUserAvatar();
+        });
+
+        //监听聊天窗口的切换
+        layim.on('chatChange', function (res) {
+            replaceDefaultUserAvatar();
+            replaceDefaultGroupAvatar();
+        });
+
+        //判断当前浏览器是否支持WebSocket
+        if ('WebSocket' in window) {
+            websocket = new WebSocket("ws://" + imChatServerAddr + "/websocket/" + username);
+        }
+        else {
+            alert('当前浏览器不支持websocket');
+            closeCurrentPage();
+        }
+
+        //连接发生错误的回调方法
+        websocket.onerror = function () {
+            alert("WebSocket连接发生错误");
+        };
+
+        //连接成功建立的回调方法
+        websocket.onopen = function () {
+            console.log("WebSocket连接成功");
+        }
+
+        //接收到消息的回调方法
+        websocket.onmessage = function (event) {
+            var result = JSON.parse(event.data);
+            if (result.type == 'chatMessage') {
+                var data = result.data;
+                layim.getMessage(data);
+            }
+            replaceDefaultUserAvatar();
+        }
+
+        //连接关闭的回调方法
+        websocket.onclose = function (isNormal) {
+            if (isNormal != true) {
+                alert("WebSocket连接意外关闭，请刷新页面重连");
+            }
+        }
+
+        //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+        window.onbeforeunload = function () {
+            websocket.close(true);
+        }
+
+        function getQueryString(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]);
+            return null;
+        }
+
+        function closeCurrentPage() {
+            window.location.href = "about:blank";
+        }
+
+        function replaceDefaultUserAvatar() {
+            var defaultUrl = '/modules/layim/images/default_avatar.png';
+            var userAvatars = $('.layim-chat-user > img, .layim-members-list > li > a > img, img[class*=layim-friend], li[class*=layim-friend] > img');
+            $.each(userAvatars, function(i, avatar) {
+                var src = $(avatar).attr('src');
+                if (src == 'undefined') {
+                    $(avatar).attr('src', defaultUrl);
+                }
+            });
+        }
+
+        function replaceDefaultGroupAvatar() {
+            var defaultUrl = '/modules/layim/images/default_group_avatar.png';
+            var userAvatars = $('img[class*=layim-group], li[class*=layim-group] > img');
+            $.each(userAvatars, function(i, avatar) {
+                var src = $(avatar).attr('src');
+                if (src == 'undefined') {
+                    $(avatar).attr('src', defaultUrl);
+                }
+            });
+        }
+
     });
 </script>
 </body>
