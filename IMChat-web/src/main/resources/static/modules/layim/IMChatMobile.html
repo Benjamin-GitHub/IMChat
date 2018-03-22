@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>IMChatMobile</title>
-    <link rel="stylesheet" href="/resources/layui/css/layui.mobile.css" media="all">
+    <link rel="stylesheet" href="/resources/layim-v3.7.6/src/css/layui.mobile.css" media="all">
 </head>
 <body>
-<script src="/resources/layui/layui.js"></script>
+<script src="/resources/layim-v3.7.6/src/layui.js"></script>
 <script>
     layui.use('mobile', function(){
         var $ = layui.zepto;
@@ -59,7 +59,8 @@
             title: 'IMChatMobile',
             isNewFriend: false,
             isgroup: true,
-            notice: true
+            notice: true,
+            copyright: true
         });
 
         //监听发送消息
