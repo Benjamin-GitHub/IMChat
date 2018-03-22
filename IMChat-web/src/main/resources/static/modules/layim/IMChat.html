@@ -7,7 +7,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <link rel="stylesheet" href="/resources/layim-v3.7.6/src/css/layui.css" media="all">
-    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
 </head>
 <body>
 
@@ -72,8 +71,10 @@
 <input id="uploadAudio" style="filter:alpha(opacity=0);opacity:0;width: 0;height: 0;display: none;"/>
 
 <script src="/resources/layim-v3.7.6/src/layui.js" charset="utf-8"></script>
-<script src="/resources/MediaUtils.js" charset="utf-8"></script>
-<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+
+<script src="js/WavAudioUtils.js" charset="utf-8"></script>
+<script src="js/WavAudioEncoder.js" charset="utf-8"></script>
+
 <script>
     layui.use('layim', function () {
         var $ = layui.jquery;
@@ -266,15 +267,15 @@
                 if(event.keyCode == 32 && !isRecording){ //space down
                     //开始录音
                     isRecording = true;
-                    startRecord(false, function(err) {
-                        if (err) {
-                            isRecording = false;
-                            layer.msg('请求麦克风权限失败', {icon: 2});
-                            return;
-                        }
+                    startRecording(function() {
                         isRecording = true;
                         voiceMsgIcon.parents('.layim-chat-footer').find('.voiceMsg-actions-text').hide();
                         voiceMsgIcon.parents('.layim-chat-footer').find('.voiceMsg-actions-icon').show();
+
+                    }, function(err) {
+                        isRecording = false;
+                        layer.msg('请求麦克风权限失败', {icon: 2});
+                        return;
                     });
 
                 } else if (event.keyCode == 27) { //esc down
@@ -283,7 +284,7 @@
                         isRecording = false;
                         voiceMsgIcon.parents('.layim-chat-footer').find('.voiceMsg-actions-text').show();
                         voiceMsgIcon.parents('.layim-chat-footer').find('.voiceMsg-actions-icon').hide();
-                        stopRecord();
+                        stopRecording();
 
                     } else {
                         //退出语音模式
@@ -304,10 +305,13 @@
                     voiceMsgIcon.parents('.layim-chat-footer').find('.voiceMsg-actions-text').show();
                     voiceMsgIcon.parents('.layim-chat-footer').find('.voiceMsg-actions-icon').hide();
 
-                    stopRecord(function(audioFile) {
-                        var data = new FormData();
+                    stopRecording(function(audioFile) {
+                        var mimeType = audioFile.type;
+                        var fileType = mimeType.substr(mimeType.lastIndexOf('/')+1);
+                        var fileName = 'voiceRecording_' + new Date().getTime() + '.' + fileType;
 
-                        data.append("file", audioFile);
+                        var data = new FormData();
+                        data.append("file", audioFile, fileName);
 
                         var req = new XMLHttpRequest();
                         req.onload = function(e) {

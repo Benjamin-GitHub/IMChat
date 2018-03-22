@@ -103,23 +103,3 @@ function stopRecord(callback) {
     // 关闭媒体流
     MediaUtils.closeStream(mediaStream);
 }
-
-// 播放录制的音频
-function playRecord() {
-    var url = URL.createObjectURL(recorderFile);
-    var dom = document.createElement(videoEnabled ? 'video' : 'audio');
-    dom.autoplay = true;
-    dom.src = url;
-    if (videoEnabled) {
-        dom.width = 640;
-        dom.height = 480;
-        dom.style.zIndex = '9999999';
-        dom.style.position = 'fixed';
-        dom.style.left = '0';
-        dom.style.right = '0';
-        dom.style.top = '0';
-        dom.style.bottom = '0';
-        dom.style.margin = 'auto';
-        document.body.appendChild(dom);
-    }
-}
