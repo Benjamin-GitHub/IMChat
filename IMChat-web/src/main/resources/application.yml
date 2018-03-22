@@ -1,9 +1,11 @@
 login:
   oauth:
     check: false
+
 app:
-  iom:
-    url-prefix: http://iomApp
+  IMChat-server:
+    url-prefix: http://IMChat-server
+    serverAddr: localhost:9007
 
 hystrix:
   command:
@@ -18,72 +20,15 @@ hystrix:
 spring:
   thymeleaf:
     cache: false
-#  redis:
-#    host: localhost
-#    port: 6379
-#    database: 0
-#  datasource:
-#      driver-class-name: org.h2.Driver
-#      url: jdbc:h2:tcp://localhost/~/Documents/temp;Mode=MYSQL;DB_CLOSE_ON_EXIT=FALSE
-#      username: soc
-#      password: soc
-#      url: jdbc:h2:mem:soc;Mode=Oracle
-#  datasource:
-#      driver-class-name: com.mysql.jdbc.Driver
-#      url: jdbc:mysql://192.168.100.85:3307/common?characterEncoding=UTF-8
-#      username: root
-#      password: 123456
-#      dbcp2:
-#  #      driver-class-name: org.h2.Driver
-#  #      url: jdbc:h2:mem:soc;Mode=MYSQL;DB_CLOSE_ON_EXIT=FALSE
-#  #      url: jdbc:h2:tcp://localhost/~/Documents/temp;Mode=MYSQL;DB_CLOSE_ON_EXIT=FALSE
-#  #      username: soc
-#  #      password: soc
-#        default-query-timeout: 5
-#        initial-size: 1
-#        max-total: 10
-  jpa:
-      show-sql: true
-      hibernate:
-        ddl-auto: none
-  #     database-platform: org.hibernate.dialect.H2Dialect
-  #      database: h2
-      database-platform: org.hibernate.dialect.MySQL5Dialect
-      database: mysql
   session:
     store-type : none
   application:
-    name: webApp
+    name: IMChat-web
   http:
     multipart:
       max-file-size: 100MB
       max-request-size: 1000MB
       enabled: true
-#  resources:
-#    cache-period: 600
-#    chain:
-#      strategy:
-#        fixed:
-#          enabled: true
-#          paths: /static/**
-#          version: test
-#        content:
-#          enabled: true
-#      html-application-cache: true
-#      cache: true
-#  redis:
-##    host: 120.77.8.180
-##    port: 6379
-#    database: 0
-#    password: Re_16_dis
-#    pool:
-#      max-idle: 8
-#      min-idle: 0
-#      max-active: 8
-#      max-wait: -1
-#    sentinel:
-#      master: redis_6379
-#      nodes: 120.77.8.180:16379,120.77.8.180:26379,120.77.8.180:36379
 
 server:
   session:
@@ -97,31 +42,27 @@ security:
   basic:
     enabled: false
 
+eureka:
+  instance:
+    #prefer-ip-address: true
+    preferIpAddress: true
+    instance-id: ${spring.cloud.client.ipAddress}:${server.port}
+    leaseRenewalIntervalInSeconds: 1
+    leaseExpirationDurationInSeconds: 2
+  client:
+    service-url:
+      defaultZone: http://localhost:10080/eureka/
 
-#eureka:
-#  instance:
-#    #prefer-ip-address: true
-#    preferIpAddress: true
-#    instance-id: ${spring.cloud.client.ipAddress}:${server.port}
-#    leaseRenewalIntervalInSeconds: 1
-#    leaseExpirationDurationInSeconds: 2
-#  client:
-#    service-url:
-#      defaultZone: http://192.168.100.85:10080/eureka/
 zuul:
   host:
     max-per-route-connections: 20
     max-total-connections: 200
   routes:
-    iom:
-      path: /iomApp/**
-      #serviceId: iomApp
-      #url: http://192.168.100.85:9003
-      url: http://127.0.0.1:9003
+    IMChat-server:
+      path: /IMChat-server/**
+      #serviceId: IMChat-server
+      url: http://localhost:9007
 
 ribbon:
   ReadTimeout: 100000
   ConnectTimeout: 100000
-
-imChat:
-  serverAddr: localhost:9007

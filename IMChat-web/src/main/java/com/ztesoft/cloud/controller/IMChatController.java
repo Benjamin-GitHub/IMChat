@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/imChat")
 public class IMChatController {
 
-    @Value("${imChat.serverAddr}")
+    @Value("${app.IMChat-server.serverAddr}")
     private String imChatServerAddr;
 
     @GetMapping("/getIMChatServerAddr")

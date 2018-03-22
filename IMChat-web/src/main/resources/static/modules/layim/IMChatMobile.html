@@ -29,24 +29,13 @@
             }
         });
 
-        //同步查询服务端地址
-        var imChatServerAddr = '';
-        $.ajax({
-            type: "get",
-            url: "/imChat/getIMChatServerAddr",
-            cache: false,
-            async: false,
-            success: function(result){
-                imChatServerAddr = result;
-            }
-        });
-        var uploadFileUrl = "http://" + imChatServerAddr + '/upload/file';
+        var uploadFileUrl = '/IMChat-server/upload/file';
 
         //查询基础信息
         var initData = {};
         $.ajax({
             type: "get",
-            url: "http://" + imChatServerAddr + '/imuser/show',
+            url: '/IMChat-server/imuser/show',
             cache: false,
             async: false,
             success: function(result){
@@ -83,6 +72,18 @@
         layim.on('chatChange', function (res) {
             replaceDefaultUserAvatar();
             replaceDefaultGroupAvatar();
+        });
+
+        //同步查询服务端地址
+        var imChatServerAddr = '';
+        $.ajax({
+            type: "get",
+            url: "/imChat/getIMChatServerAddr",
+            cache: false,
+            async: false,
+            success: function(result){
+                imChatServerAddr = result;
+            }
         });
 
         //判断当前浏览器是否支持WebSocket

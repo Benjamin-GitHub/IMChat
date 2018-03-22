@@ -8,8 +8,8 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication/*(exclude = {HibernateJpaAutoConfiguration.class, JpaRepositoriesAutoConfiguration.class,
         DataSourceAutoConfiguration.class})*/
-//@EnableDiscoveryClient
-//@EnableZuulProxy
+@EnableDiscoveryClient
+@EnableZuulProxy
 //@EnableRedisHttpSession
 //@ComponentScan(basePackages={"com.ztesoft.cloud"})
 /**@Import(LoggerAdvice.class)

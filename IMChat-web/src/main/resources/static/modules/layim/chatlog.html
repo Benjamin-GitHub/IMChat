@@ -51,7 +51,7 @@
         var size = 10;
         var chatLogData = [];
 
-        $.getJSON('http://localhost:9007/immessage/list/'+id+'/'+type+'/-1/'+size, function(result) {
+        $.getJSON('/IMChat-server/immessage/list/'+id+'/'+type+'/-1/'+size, function(result) {
             chatLogData = result.data;
             $.each(chatLogData, function(i, obj) {
                 obj.cid = obj.id;
@@ -79,7 +79,7 @@
                         shade: [0.5,'#fff'],
                         time: 10*1000
                     });
-                    $.getJSON('http://localhost:9007/immessage/list/'+id+'/'+type+'/'+msgId+'/'+size, function(result) {
+                    $.getJSON('/IMChat-server/immessage/list/'+id+'/'+type+'/'+msgId+'/'+size, function(result) {
                         chatLogData = result.data;
                         $.each(chatLogData, function(i, obj) {
                             obj.cid = obj.id;

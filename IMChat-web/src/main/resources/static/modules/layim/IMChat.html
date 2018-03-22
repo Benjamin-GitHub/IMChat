@@ -60,29 +60,18 @@
             }
         });
 
-        //同步查询服务端地址
-        var imChatServerAddr = '';
-        $.ajax({
-            type: "get",
-            url: "/imChat/getIMChatServerAddr",
-            cache: false,
-            async: false,
-            success: function(result){
-                imChatServerAddr = result;
-            }
-        });
-        var uploadFileUrl = "http://" + imChatServerAddr + '/upload/file';
+        var uploadFileUrl = '/IMChat-server/upload/file';
 
         //layim基础配置
         layim.config({
             //初始化接口
             init: {
-                url: "http://" + imChatServerAddr + '/imuser/show'
+                url: '/IMChat-server/imuser/show'
             },
 
             //查看群员接口
             members: {
-                url: "http://" + imChatServerAddr + '/imuser/list'
+                url: '/IMChat-server/imuser/list'
             },
 
             uploadImage: {
@@ -306,6 +295,18 @@
         }
 
         function initWebSocket() {
+            //同步查询服务端地址
+            var imChatServerAddr = '';
+            $.ajax({
+                type: "get",
+                url: "/imChat/getIMChatServerAddr",
+                cache: false,
+                async: false,
+                success: function(result){
+                    imChatServerAddr = result;
+                }
+            });
+
             //判断当前浏览器是否支持WebSocket
             if ('WebSocket' in window) {
                 websocket = new WebSocket("ws://" + imChatServerAddr + "/websocket/" + username);

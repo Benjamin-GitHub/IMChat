@@ -11,7 +11,7 @@
     <modules>
         <module>IMChat-web</module>
         <module>IMChat-server</module>
-	<module>IMChat-register</module>
+	    <module>IMChat-register</module>
     </modules>
 
     <build>
@@ -135,7 +135,7 @@
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
-                <version>Camden.SR5</version>
+                <version>Camden.SR6</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
