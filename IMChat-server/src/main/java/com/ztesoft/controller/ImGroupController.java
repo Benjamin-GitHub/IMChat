@@ -9,6 +9,7 @@ import com.ztesoft.service.ImUserService;
 import com.ztesoft.util.common.Constants;
 import com.ztesoft.util.exception.ExceptionUtil;
 import com.ztesoft.util.seq.SequenceCreator;
+import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,7 +18,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 @RestController
 public class ImGroupController {
@@ -192,6 +196,29 @@ public class ImGroupController {
                     }
                 }
 
+        }
+        return feedback(Constants.INF_CODE_SUCC,Constants.INF_DESC_SUCC,null);
+    }
+
+    /**
+     * 移除讨论组成员,不能移除创建者
+     * @param groupId
+     * @param userIds
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/imgroupuserrela/delete/{groupId}/{userIds}",method = {RequestMethod.DELETE})
+    public String deleteImGroupMembersByUserIds(@PathVariable long groupId,@PathVariable String userIds, HttpServletRequest request) {
+
+        try {
+            // 转换long类型的数组
+            Long[] userIdArr = (Long[]) ConvertUtils.convert(userIds.split(","),Long.class);
+            List<Long> userIdList = Arrays.asList(userIdArr);
+            List<Long> userIdArrayList = new ArrayList<>(userIdList);
+            this.imGroupService.deleteImGroupMembersByUserIds(groupId, userIdArrayList);
+        } catch (Exception e) {
+            logger.error("deleteImGroupMembers occur an error !",e);
+            return feedback(Constants.INF_CODE_ERROR,Constants.INF_DESC_ERROR,ExceptionUtil.getMessage(e));
         }
         return feedback(Constants.INF_CODE_SUCC,Constants.INF_DESC_SUCC,null);
     }

@@ -1,11 +1,14 @@
 package com.ztesoft.service;
 
 import com.ztesoft.dao.ImGroupDao;
+import com.ztesoft.dao.ImUserDao;
 import com.ztesoft.model.im.ImGroupDto;
+import com.ztesoft.model.im.ImUserDto;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,6 +21,8 @@ public class ImGroupServiceImpl implements ImGroupService {
     private static final Logger logger = Logger.getLogger(ImGroupServiceImpl.class);
     @Autowired
     private ImGroupDao imGroupDao;
+    @Autowired
+    private ImUserDao imUserDao;
 
     @Override
     public void insertImGroup(ImGroupDto group) throws Exception {
@@ -55,7 +60,28 @@ public class ImGroupServiceImpl implements ImGroupService {
 
     @Override
     public void deleteImGroupMembersByUserIds(long groupId, List<Long> userIds) throws Exception {
+        ImGroupDto groupDto = this.imGroupDao.getImGroupByGroupId(groupId);
+        List<ImUserDto> imUserDtoList = this.imUserDao.listGroupMembersByGroupId(groupId);
+        List<Long> userIdList = new ArrayList<>();
 
+        // 过滤,排除不是该讨论组组的成员和创建者,并存到userIdList中
+        for (ImUserDto imUserDto : imUserDtoList) {
+            if (userIds.contains(imUserDto.getUserId())) {
+                if (imUserDto.getUserId() != groupDto.getFounder()) {
+                    userIdList.add(imUserDto.getUserId());
+                }
+            }
+        }
+
+        if (userIdList.size()>0) {
+            // 移除用户和群的关联关系
+            for (long userId : userIdList) {
+                this.imGroupDao.deleteImGroupMember(groupId, userId);
+            }
+            // 更新群的成员个数
+            long memberNum = groupDto.getGroupMemberNum() - userIdList.size();
+            this.imGroupDao.updateImGroupMemberNum(groupId, memberNum);
+        }
     }
 
     @Override

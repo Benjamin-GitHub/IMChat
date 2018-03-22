@@ -18,6 +18,6 @@ public interface ImGroupDao {
     public void insertImGroupUserRela(long groupId,long userId)throws Exception;
     public void deleteImGroupUserRealByGroupId(long groupId)throws Exception;
     public List<ImGroupDto> listUserGroups(long userId)throws Exception;
-
+    public void deleteImGroupMember(long groupId, long userId) throws Exception;
 
 }
