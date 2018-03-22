@@ -137,10 +137,11 @@
             ],
 
             title: '我的消息', //自定义主面板最小化时的标题
+            initSkin: '2.jpg',
             isfriend: false, //是否开启好友
-//            isgroup: false, //是否开启群组
+            isgroup: true, //是否开启群组
             notice: true, //是否开启桌面消息提醒，默认false
-//            voice: false, //声音提醒，默认开启，声音文件为：default.mp3
+            voice: true, //声音提醒，默认开启，声音文件为：default.mp3
 
             chatLog: './chatlog.html', //聊天记录页面地址，若不开启，剔除该项即可
             copyright: true
@@ -149,7 +150,7 @@
         //监听layim建立就绪
         layim.on('ready', function (options) {
             //隐藏皮肤按钮
-            $('.layui-icon.layim-tool-skin').hide();
+//            $('.layui-icon.layim-tool-skin').hide();
 
             //隐藏签名设置
             $('.layui-layim-remark').hide();
@@ -264,12 +265,13 @@
                 $('textarea').blur();
                 if(event.keyCode == 32 && !isRecording){ //space down
                     //开始录音
+                    isRecording = true;
                     startRecord(false, function(err) {
                         if (err) {
+                            isRecording = false;
                             layer.msg('请求麦克风权限失败', {icon: 2});
                             return;
                         }
-
                         isRecording = true;
                         voiceMsgIcon.parents('.layim-chat-footer').find('.voiceMsg-actions-text').hide();
                         voiceMsgIcon.parents('.layim-chat-footer').find('.voiceMsg-actions-icon').show();
