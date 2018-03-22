@@ -12,9 +12,9 @@ public class CorsConfigurerAdapter extends WebMvcConfigurerAdapter {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/upload/*").allowedOrigins("*");
-        registry.addMapping("/imuser/*").allowedOrigins("*");
-        registry.addMapping("/immessage/**").allowedOrigins("*");
+//        registry.addMapping("/upload/*").allowedOrigins("*");
+//        registry.addMapping("/imuser/*").allowedOrigins("*");
+//        registry.addMapping("/immessage/**").allowedOrigins("*");
     }
 
 }
