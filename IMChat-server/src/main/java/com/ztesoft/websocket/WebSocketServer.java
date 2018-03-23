@@ -2,7 +2,6 @@ package com.ztesoft.websocket;
 
 import com.google.gson.Gson;
 import com.ztesoft.model.im.ImGroupDto;
-import com.ztesoft.model.im.ImMessageDto;
 import com.ztesoft.model.im.ImMessagePo;
 import com.ztesoft.model.im.ImUserDto;
 import com.ztesoft.model.websocket.*;
@@ -30,21 +29,23 @@ public class WebSocketServer {
     private static AtomicInteger onlineCount = new AtomicInteger(0);
 
     //concurrent包的线程安全Map，用来存放每个客户端对应的MyWebSocket对象。
-    private static final  ConcurrentHashMap<String,Session> userOnlineSession = new ConcurrentHashMap<String,Session>();
-
+    private static final  ConcurrentHashMap<String,Session> userOnlineSession = new ConcurrentHashMap<>();
 
     private ImUserService imUserService = SpringApplicationContextFactory.getApplicationContext().getBean(ImUserServiceImpl.class)  ;
 
     private ImMessageService imMessageService = SpringApplicationContextFactory.getApplicationContext().getBean(ImMessageServiceImpl.class);
 
     private ImGroupService imGroupService = SpringApplicationContextFactory.getApplicationContext().getBean(ImGroupServiceImpl.class);
+
+    private RedisService redisService = SpringApplicationContextFactory.getApplicationContext().getBean(RedisService.class);
     /**
      * 连接建立成功调用的方法*/
     @OnOpen
     public void onOpen(@PathParam("username")String username, Session session) {
         userOnlineSession.put(username,session);     //加入map中
+        ImUserDto user;
         try {
-            ImUserDto user  = imUserService.getImUserByUsername(username);
+            user  = imUserService.getImUserByUsername(username);
             if(user == null){
                 user = imUserService.getUosStaffInfoByUsername(username);
                 if(user != null){
@@ -57,8 +58,21 @@ public class WebSocketServer {
             logger.error("find user occur an error!",e);
         }
 
-        sendSysNotice(username,"new user : "+username+" online!");
+        // 查看该用户是否有未读消息,若有则发送消息
+        try {
+            String message = redisService.pop(
+                    Constants.resourceBundle.getString("redis.key.unread.message") + username);
+            while (null!=message && !"".equals(message)) {
+                sendMessage(username, message, true);
+                message = redisService.pop(
+                        Constants.resourceBundle.getString("redis.key.unread.message") + username);
+            }
+        } catch (Exception e) {
+            logger.error("获取redis消息队列失败!", e);
+        }
 
+
+        sendSysNotice(username,"new user : "+username+" online!", false);
 
         int onlineMembers = addOnlineCount(username);           //在线数加1
         if(logger.isInfoEnabled()){
@@ -71,8 +85,8 @@ public class WebSocketServer {
      */
     @OnClose
     public void onClose(@PathParam("username")String username) {
-        sendSysNotice(username," user : "+username+" disconnected!");
         userOnlineSession.remove(username);  //从set中删除
+        sendSysNotice(username," user : "+username+" disconnected!", false);
         subOnlineCount();           //在线数减1
         if(logger.isInfoEnabled()){
             logger.info("用户连接关闭！当前在线人数为" + getOnlineCount()+"  "+username +" 用户退出");
@@ -131,7 +145,7 @@ public class WebSocketServer {
                 for (ImUserDto user : users) {
                     if(receData.getMine().getId() != user.getUserId()){
                         userData.setMine(false);
-                        sendMessage(user.getUsername(),gson.toJson(sendBo));
+                        sendMessage(user.getUsername(), gson.toJson(sendBo), true);
                     }
                 }
             } catch (Exception e) {
@@ -161,17 +175,38 @@ public class WebSocketServer {
          logger.error("user onError occur! usernmae:"+username,error);
      }
 
-
-     public void sendMessage(String username,String message) throws IOException {
+    /**
+     * 给用户发送信息
+     * @param username   用户名
+     * @param message    信息内容
+     * @param storeMessage  是否需要通知未上线用户,
+     *                      为true时,若用户未上线,则会把信息保存到redis中,用户上线时再从redis中获取信息
+     * @throws IOException
+     */
+     public void sendMessage(String username,String message, boolean storeMessage) throws IOException {
+         // 若用户已上线,直接发送消息
          if(userOnlineSession.get(username) != null){
              userOnlineSession.get(username).getBasicRemote().sendText(message);
              logger.info(message);
-
-
+         // 否则把消息存到redis队列中,队列名为username_userId
+         } else if (userOnlineSession.get(username)==null && storeMessage==true){
+             try {
+                 redisService.push(
+                         Constants.resourceBundle.getString("redis.key.unread.message") + username, message);
+             } catch (Exception e) {
+                 logger.error("消息存入redis失败",e);
+             }
          }
      }
 
-     public void sendSysNotice(String username,String notice){
+    /**
+     * 发送系统通知
+     * @param username 用户名
+     * @param notice   系统通知内容
+     * @param storeMessage 是否需要通知未上线用户,
+     *                      为true时,若用户未上线,则会把信息保存到redis中,用户上线时再从redis中获取信息
+     */
+     public void sendSysNotice(String username,String notice, boolean storeMessage){
          Gson gson = new Gson();
          MessageServerBo sendBo = new MessageServerBo();
          MessageServerSysData sysData = new MessageServerSysData();
@@ -188,7 +223,7 @@ public class WebSocketServer {
                  sysData.setSystem(true);
                  List<ImUserDto> users = this.imUserService.listGroupMembersByGroupId(group.getGroupId());
                  for (ImUserDto userVo: users) {
-                     sendMessage(userVo.getUsername(),gson.toJson(sendBo));
+                     sendMessage(userVo.getUsername(), gson.toJson(sendBo), storeMessage);
                  }
              }
          } catch (Exception e) {
@@ -198,16 +233,15 @@ public class WebSocketServer {
      }
 
 
-    public static synchronized int getOnlineCount() {
+    private static synchronized int getOnlineCount() {
         return onlineCount.get();
     }
 
-    public static synchronized int addOnlineCount(String username) {
-
+    private static synchronized int addOnlineCount(String username) {
         return onlineCount.incrementAndGet();
     }
 
-    public static synchronized void subOnlineCount() {
+    private static synchronized void subOnlineCount() {
         onlineCount.decrementAndGet();
     }
 }

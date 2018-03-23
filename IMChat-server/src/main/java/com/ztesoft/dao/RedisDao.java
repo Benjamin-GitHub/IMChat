@@ -1,6 +1,6 @@
-package com.ztesoft.service;
+package com.ztesoft.dao;
 
-public interface RedisService {
+public interface RedisDao {
 
     /**
      * 从reids集合list弹出内容
