@@ -439,6 +439,7 @@
                     }
                 }
                 replaceDefaultUserAvatar();
+                replaceDefaultGroupAvatar();
             }
 
             //连接关闭的回调方法
@@ -471,7 +472,7 @@
 
         function replaceDefaultGroupAvatar() {
             var defaultUrl = '/modules/layim/images/default_group_avatar.png';
-            var userAvatars = $('img[class*=layim-group], li[class*=layim-group] > img');
+            var userAvatars = $('img[class*=layim-group], li[class*=layim-group] > img, #layui-layim-min');
             $.each(userAvatars, function(i, avatar) {
                 var src = $(avatar).attr('src');
                 if (src == 'undefined') {

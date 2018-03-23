@@ -351,6 +351,12 @@ layui.define(['layer', 'laytpl', 'upload'], function(exports){
     var html = function(end){
       return new RegExp('\\n*\\['+ (end||'') +'(code|pre|div|span|p|table|thead|th|tbody|tr|td|ul|li|ol|li|dl|dt|dd|h2|h3|h4|h5)([\\s\\S]*?)\\]\\n*', 'g');
     };
+
+    //自定义html富文本内容 added by lym
+    if (content.match(/html\[([\s\S]+?)\]/g)) {
+      return content.replace(/(^html\[)|(\]$)/g, '');
+    }
+
     content = (content||'').replace(/&(?!#?[a-zA-Z0-9]+;)/g, '&amp;')
     .replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, '&#39;').replace(/"/g, '&quot;') //XSS
     .replace(/@(\S+)(\s+?|$)/g, '@<a href="javascript:;">$1</a>$2') //转义@
@@ -368,7 +374,7 @@ layui.define(['layer', 'laytpl', 'upload'], function(exports){
       if(!href) return str;
       return '<a class="layui-layim-file" href="'+ href +'" download target="_blank"><i class="layui-icon">&#xe61e;</i><cite>'+ (text||href) +'</cite></a>';
     })
-    .replace(/audio\[([^\s]+?)\](\([\s\S]*?\))?/g, function(audio){  //转义音频
+    .replace(/audio\[([^\s]+?)\](\([\s\S]*?\))?/g, function(audio){  //转义音频 （audio[地址](自定义文本) edited by lym）
       var src = (audio.match(/audio\[([\s\S]+?)\]/)||[])[1];
       var text = (audio.match(/\]\(([\s\S]*?)\)/)||[])[1];
       return '<div class="layui-unselect layui-layim-audio" layim-event="playAudio" data-src="' + src + '"><i class="layui-icon">&#xe652;</i><p>' + (text||'音频消息') + '</p></div>';
