@@ -152,7 +152,6 @@
             ],
 
             title: '我的消息', //自定义主面板最小化时的标题
-            initSkin: '2.jpg',
             isfriend: false, //是否开启好友
             isgroup: true, //是否开启群组
             notice: true, //是否开启桌面消息提醒，默认false
@@ -165,7 +164,7 @@
         //监听layim建立就绪
         layim.on('ready', function (options) {
             //隐藏皮肤按钮
-//            $('.layui-icon.layim-tool-skin').hide();
+            $('.layui-icon.layim-tool-skin').hide();
 
             //隐藏签名设置
             $('.layui-layim-remark').hide();
