@@ -101,4 +101,13 @@ public class ImGroupDaoImpl implements ImGroupDao {
         List<ImGroupDto> list = this.jdbcTemplate.query(sqlBuf.toString(),param,BeanPropertyRowMapper.newInstance(ImGroupDto.class));
         return list;
     }
+
+    @Override
+    public void deleteImGroupMember(long groupId, long userId) throws Exception {
+        StringBuffer sqlBuf = new StringBuffer("DELETE FROM IM_GROUP_USER_RELA A\n" +
+                "    WHERE A.GROUP_ID = ? \n" +
+                "    AND A.USER_ID = ?");
+        Object[] param = new Object[]{groupId, userId};
+        this.jdbcTemplate.update(sqlBuf.toString(),param);
+    }
 }
