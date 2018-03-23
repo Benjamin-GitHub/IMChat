@@ -183,12 +183,7 @@
             openGroupChat(options.group);
 
             //最大化聊天窗口，并不允许关闭
-            $('.layui-layer-max').click();
-            $('.layui-layer-maxmin').hide();
-            $('.layui-layer-close').hide();
-            $('.layim-send-close').hide();
-            $('.layui-layer-title').css('cursor', 'auto');
-            $('.layui-layer-move').css('cursor', 'auto');
+            maximizeChatWindow();
         });
 
         //监听发送消息
@@ -501,6 +496,16 @@
                     layim.chat(group);
                 });
             }
+        }
+
+        function maximizeChatWindow() {
+            $('.layui-layer-max').click();
+            $('.layui-layer-maxmin').hide();
+            $('.layui-layer-close').hide();
+            $('.layim-send-close').hide();
+            $('.layui-layer-title').css('cursor', 'auto');
+            $('.layui-layer-move').css('cursor', 'auto');
+            $('.layim-chat-send .layim-menu-box').css('top', '-45px');
         }
     });
 </script>
