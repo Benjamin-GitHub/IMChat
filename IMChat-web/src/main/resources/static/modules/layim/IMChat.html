@@ -72,8 +72,22 @@
 
 <script src="/resources/layim-v3.7.6/src/layui.js" charset="utf-8"></script>
 
-<script src="js/WavAudioUtils.js" charset="utf-8"></script>
-<script src="js/WavAudioEncoder.js" charset="utf-8"></script>
+<!-- ===================== 多媒体录制工具 多选1 ===================== -->
+
+<!-- 基础MediaRecorder方式录制，媒体格式取决于浏览器 -->
+<!--<script src="js/MediaUtils.js" charset="utf-8"></script>-->
+
+<!-- 利用AudioContext录音，前端worker统一转码为wav格式，仅支持Chrome和Firefox -->
+<!--（wav采样位16bit，采样率取决于浏览器）-->
+<!--<script src="js/WavAudioUtils.js" charset="utf-8"></script>-->
+<!--<script src="js/WavAudioEncoder.js" charset="utf-8"></script>-->
+
+<!-- MediaStreamRecorder.js，浏览器兼容性更好，支持视频和音频的多种媒体格式录制 -->
+<!--（wav采样位16bit，采样率非windows环境可配置22050到96000）-->
+<script src="js/MediaStreamUtils.js" charset="utf-8"></script>
+<script src="js/MediaStreamRecorder.js" charset="utf-8"></script>
+
+<!-- ===================== 多媒体录制工具 多选1 ===================== -->
 
 <script>
     layui.use('layim', function () {

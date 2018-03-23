@@ -10,7 +10,7 @@ var audioContext = new AudioContext;
 if (audioContext.createScriptProcessor == null)
     audioContext.createScriptProcessor = audioContext.createJavaScriptNode;
 var processor = undefined;
-var worker = new Worker('js/EncoderWorker.js');
+var worker = new Worker('js/WavEncoderWorker.js');
 var encoder = undefined;
 var encodingProcess = 'separate';       // separate | background | direct
 var microphone = undefined;
