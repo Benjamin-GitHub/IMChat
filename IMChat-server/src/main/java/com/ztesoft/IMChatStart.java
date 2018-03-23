@@ -29,7 +29,5 @@ public class IMChatStart {
         BeanFactory.setCtx(ctx);
         imService = ctx.getBean(ImUserServiceImpl.class);
         System.out.println(imService);
-
-
     }
 }
