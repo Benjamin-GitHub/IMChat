@@ -5,6 +5,7 @@ navigator.getUserMedia =
     navigator.msGetUserMedia ||
     window.getUserMedia;
 
+var AudioContext = window.AudioContext || window.webkitAudioContext;
 var audioContext = new AudioContext;
 if (audioContext.createScriptProcessor == null)
     audioContext.createScriptProcessor = audioContext.createJavaScriptNode;
@@ -14,10 +15,11 @@ var encoder = undefined;
 var encodingProcess = 'separate';       // separate | background | direct
 var microphone = undefined;
 var finishRecordingCallback = undefined;
+var numChannels = 1;
 
 function getBuffers(event) {
     var buffers = [];
-    for (var ch = 0; ch < 2; ++ch)
+    for (var ch = 0; ch < numChannels; ++ch)
         buffers[ch] = event.inputBuffer.getChannelData(ch);
     return buffers;
 }
@@ -28,15 +30,15 @@ function startRecording(onSuccess, onError) {
             microphone = audioContext.createMediaStreamSource(stream);
 
             try {
-                processor = audioContext.createScriptProcessor(undefined, 2, 2);
+                processor = audioContext.createScriptProcessor(undefined, numChannels, numChannels);
             } catch (e) {
-                processor = audioContext.createScriptProcessor(4096, 2, 2);
+                processor = audioContext.createScriptProcessor(4096, numChannels, numChannels);
             }
             microphone.connect(processor);
             processor.connect(audioContext.destination);
 
             if (encodingProcess === 'direct') {
-                encoder = new WavAudioEncoder(audioContext.sampleRate, 2);
+                encoder = new WavAudioEncoder(audioContext.sampleRate, numChannels);
                 processor.onaudioprocess = function(event) {
                     encoder.encode(getBuffers(event));
                 };
@@ -45,7 +47,7 @@ function startRecording(onSuccess, onError) {
                     command: 'start',
                     process: encodingProcess,
                     sampleRate: audioContext.sampleRate,
-                    numChannels: 2
+                    numChannels: numChannels
                 });
                 processor.onaudioprocess = function(event) {
                     worker.postMessage({ command: 'record', buffers: getBuffers(event) });
