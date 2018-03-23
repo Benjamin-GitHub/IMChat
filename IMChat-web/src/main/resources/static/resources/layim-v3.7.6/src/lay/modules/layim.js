@@ -1806,7 +1806,7 @@ layui.define(['layer', 'laytpl', 'upload'], function(exports){
         ,area: ['460px', '300px']
         ,maxmin: true
         ,shade: false
-        ,content: '<div style="background-color: #000; height: 100%;"><video style="position: absolute; width: 100%; height: 100%;" src="'+ videoData +'" loop="loop" autoplay="autoplay"></video></div>'
+        ,content: '<div style="background-color: #000; height: 100%;"><video style="position: absolute; width: 100%; height: 100%;" src="'+ videoData +'" loop="loop" autoplay="autoplay" controls="controls"></video></div>'
       });
     }
     
