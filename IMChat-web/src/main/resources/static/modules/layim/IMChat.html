@@ -65,6 +65,10 @@
         color: #6bd0f7;
     }
 
+    .layui-layer-move {
+        cursor: auto !important;
+    }
+
 </style>
 
 <input id="uploadVideo" style="filter:alpha(opacity=0);opacity:0;width: 0;height: 0;display: none;"/>
@@ -172,14 +176,19 @@
             //隐藏状态设置
             $('.layui-layim-status').hide();
 
-            //默认打开一个讨论组聊天窗口
-            if (options.group && options.group.length > 0) {
-                options.group[0].type = 'group';
-                options.group[0].name = options.group[0].groupname;
-                layim.chat(options.group[0]);
-            }
-
+            //初始化WebSocket
             initWebSocket();
+
+            //打开聊天窗口
+            openGroupChat(options.group);
+
+            //最大化聊天窗口，并不允许关闭
+            $('.layui-layer-max').click();
+            $('.layui-layer-maxmin').hide();
+            $('.layui-layer-close').hide();
+            $('.layim-send-close').hide();
+            $('.layui-layer-title').css('cursor', 'auto');
+            $('.layui-layer-move').css('cursor', 'auto');
         });
 
         //监听发送消息
@@ -469,6 +478,33 @@
                     $(avatar).attr('src', defaultUrl);
                 }
             });
+        }
+
+        function openGroupChat(groups) {
+            if (groups) {
+                //默认打开url参数groupId对应的讨论组
+                var groupId= getQueryString('groupId');
+                if (groupId) {
+                    //先找到id对应的数组
+                    var group = groups.filter(function(obj) {
+                        return obj.id == groupId;
+                    })[0];
+
+                    if (group) {
+                        group.type = 'group';
+                        group.name = group.groupname;
+                        layim.chat(group);
+                        return;
+                    }
+                }
+
+                //没有传参或讨论组不存在，就打开全部讨论组
+                $.each(groups, function(i, group) {
+                    group.type = 'group';
+                    group.name = group.groupname;
+                    layim.chat(group);
+                });
+            }
         }
     });
 </script>
