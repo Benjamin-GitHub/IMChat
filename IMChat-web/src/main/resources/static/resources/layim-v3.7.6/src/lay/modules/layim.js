@@ -368,8 +368,10 @@ layui.define(['layer', 'laytpl', 'upload'], function(exports){
       if(!href) return str;
       return '<a class="layui-layim-file" href="'+ href +'" download target="_blank"><i class="layui-icon">&#xe61e;</i><cite>'+ (text||href) +'</cite></a>';
     })
-    .replace(/audio\[([^\s]+?)\]/g, function(audio){  //转义音频
-      return '<div class="layui-unselect layui-layim-audio" layim-event="playAudio" data-src="' + audio.replace(/(^audio\[)|(\]$)/g, '') + '"><i class="layui-icon">&#xe652;</i><p>音频消息</p></div>';
+    .replace(/audio\[([^\s]+?)\](\([\s\S]*?\))?/g, function(audio){  //转义音频
+      var src = (audio.match(/audio\[([\s\S]+?)\]/)||[])[1];
+      var text = (audio.match(/\]\(([\s\S]*?)\)/)||[])[1];
+      return '<div class="layui-unselect layui-layim-audio" layim-event="playAudio" data-src="' + src + '"><i class="layui-icon">&#xe652;</i><p>' + (text||'音频消息') + '</p></div>';
     })
     .replace(/video\[([^\s]+?)\]/g, function(video){  //转义音频
       return '<div class="layui-unselect layui-layim-video" layim-event="playVideo" data-src="' + video.replace(/(^video\[)|(\]$)/g, '') + '"><i class="layui-icon">&#xe652;</i></div>';
