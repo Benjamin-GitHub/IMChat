@@ -62,12 +62,12 @@ var recorderFile, stopRecordCallback;
 var videoEnabled = false;
 
 // 录制短语音
-function startRecord(enableVideo, callback) {
+function startRecording(onSuccess, onError, enableVideo) {
     videoEnabled = enableVideo;
     MediaUtils.getUserMedia(enableVideo, true, function (err, stream) {
         if (err) {
-            if (callback) {
-                callback(err);
+            if (onError) {
+                onError(err);
             } else {
                 throw err;
             }
@@ -88,38 +88,18 @@ function startRecord(enableVideo, callback) {
             };
             recorder.start();
 
-            if (callback) {
-                callback();
+            if (onSuccess) {
+                onSuccess();
             }
         }
     });
 }
 
 // 停止录制
-function stopRecord(callback) {
+function stopRecording(callback) {
     stopRecordCallback = callback;
     // 终止录制器
     recorder.stop();
     // 关闭媒体流
     MediaUtils.closeStream(mediaStream);
-}
-
-// 播放录制的音频
-function playRecord() {
-    var url = URL.createObjectURL(recorderFile);
-    var dom = document.createElement(videoEnabled ? 'video' : 'audio');
-    dom.autoplay = true;
-    dom.src = url;
-    if (videoEnabled) {
-        dom.width = 640;
-        dom.height = 480;
-        dom.style.zIndex = '9999999';
-        dom.style.position = 'fixed';
-        dom.style.left = '0';
-        dom.style.right = '0';
-        dom.style.top = '0';
-        dom.style.bottom = '0';
-        dom.style.margin = 'auto';
-        document.body.appendChild(dom);
-    }
 }

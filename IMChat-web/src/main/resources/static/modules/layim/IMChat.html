@@ -7,7 +7,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <link rel="stylesheet" href="/resources/layim-v3.7.6/src/css/layui.css" media="all">
-    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
 </head>
 <body>
 
@@ -66,14 +65,34 @@
         color: #6bd0f7;
     }
 
+    .layui-layer-move {
+        cursor: auto !important;
+    }
+
 </style>
 
 <input id="uploadVideo" style="filter:alpha(opacity=0);opacity:0;width: 0;height: 0;display: none;"/>
 <input id="uploadAudio" style="filter:alpha(opacity=0);opacity:0;width: 0;height: 0;display: none;"/>
 
 <script src="/resources/layim-v3.7.6/src/layui.js" charset="utf-8"></script>
-<script src="/resources/MediaUtils.js" charset="utf-8"></script>
-<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+
+<!-- ===================== 多媒体录制工具 多选1 ===================== -->
+
+<!-- 基础MediaRecorder方式录制，媒体格式取决于浏览器 -->
+<!--<script src="js/MediaUtils.js" charset="utf-8"></script>-->
+
+<!-- 利用AudioContext录音，前端worker统一转码为wav格式，仅支持Chrome和Firefox -->
+<!--（wav采样位16bit，采样率取决于浏览器）-->
+<!--<script src="js/WavAudioUtils.js" charset="utf-8"></script>-->
+<!--<script src="js/WavAudioEncoder.js" charset="utf-8"></script>-->
+
+<!-- MediaStreamRecorder.js，浏览器兼容性更好，支持视频和音频的多种媒体格式录制 -->
+<!--（wav采样位16bit，采样率非windows环境可配置22050到96000）-->
+<script src="js/MediaStreamUtils.js" charset="utf-8"></script>
+<script src="js/MediaStreamRecorder.js" charset="utf-8"></script>
+
+<!-- ===================== 多媒体录制工具 多选1 ===================== -->
+
 <script>
     layui.use('layim', function () {
         var $ = layui.jquery;
@@ -95,7 +114,7 @@
             }
         });
 
-        var uploadFileUrl = '/IMChat-server/upload/file';
+        var uploadFileUrl = '/zuul/IMChat-server/upload/file';
 
         //layim基础配置
         layim.config({
@@ -138,9 +157,9 @@
 
             title: '我的消息', //自定义主面板最小化时的标题
             isfriend: false, //是否开启好友
-//            isgroup: false, //是否开启群组
+            isgroup: true, //是否开启群组
             notice: true, //是否开启桌面消息提醒，默认false
-//            voice: false, //声音提醒，默认开启，声音文件为：default.mp3
+            voice: 'default.mp3', //声音提醒，默认开启，声音文件为：default.mp3
 
             chatLog: './chatlog.html', //聊天记录页面地址，若不开启，剔除该项即可
             copyright: true
@@ -157,14 +176,14 @@
             //隐藏状态设置
             $('.layui-layim-status').hide();
 
-            //默认打开一个讨论组聊天窗口
-            if (options.group && options.group.length > 0) {
-                options.group[0].type = 'group';
-                options.group[0].name = options.group[0].groupname;
-                layim.chat(options.group[0]);
-            }
-
+            //初始化WebSocket
             initWebSocket();
+
+            //打开聊天窗口
+            openGroupChat(options.group);
+
+            //最大化聊天窗口，并不允许关闭
+            maximizeChatWindow();
         });
 
         //监听发送消息
@@ -231,7 +250,8 @@
                     accept: 'audio',
                     done: function(res){
                         var url = encodeURI(res.data.src);
-                        insert('audio[' + url + ']'); //将内容插入到编辑器，主要由insert完成
+                        var fileName = res.data.name;
+                        insert('audio[' + url + '](' + fileName + ')'); //将内容插入到编辑器，主要由insert完成
                         send(); //自动发送
                     },
                     error: function(){
@@ -245,6 +265,7 @@
 
         //监听自定义工具栏点击(语音消息)
         var isRecording = false;
+        var startRecordingTime;
         layim.on('tool(voiceMsg)', function(insert, send, obj){ //事件中的tool为固定字符，而code则为过滤器，对应的是工具别名（alias）
             var voiceMsgIcon = this;
 
@@ -264,15 +285,17 @@
                 $('textarea').blur();
                 if(event.keyCode == 32 && !isRecording){ //space down
                     //开始录音
-                    startRecord(false, function(err) {
-                        if (err) {
-                            layer.msg('请求麦克风权限失败', {icon: 2});
-                            return;
-                        }
-
+                    isRecording = true;
+                    startRecording(function() {
                         isRecording = true;
                         voiceMsgIcon.parents('.layim-chat-footer').find('.voiceMsg-actions-text').hide();
                         voiceMsgIcon.parents('.layim-chat-footer').find('.voiceMsg-actions-icon').show();
+                        startRecordingTime = new Date();
+
+                    }, function(err) {
+                        isRecording = false;
+                        layer.msg('请求麦克风权限失败', {icon: 2});
+                        return;
                     });
 
                 } else if (event.keyCode == 27) { //esc down
@@ -281,7 +304,7 @@
                         isRecording = false;
                         voiceMsgIcon.parents('.layim-chat-footer').find('.voiceMsg-actions-text').show();
                         voiceMsgIcon.parents('.layim-chat-footer').find('.voiceMsg-actions-icon').hide();
-                        stopRecord();
+                        stopRecording();
 
                     } else {
                         //退出语音模式
@@ -302,16 +325,27 @@
                     voiceMsgIcon.parents('.layim-chat-footer').find('.voiceMsg-actions-text').show();
                     voiceMsgIcon.parents('.layim-chat-footer').find('.voiceMsg-actions-icon').hide();
 
-                    stopRecord(function(audioFile) {
-                        var data = new FormData();
+                    var audioLength = (new Date().getTime() - startRecordingTime.getTime()) / 1000;
+                    var minutes = Math.floor(audioLength / 60);
+                    var seconds = Math.floor(audioLength % 60);
+                    var audioLengthStr = (minutes < 10 ? ('0'+minutes) : minutes) + ':' + (seconds < 10 ? ('0'+seconds) : seconds);
 
-                        data.append("file", audioFile);
+                    stopRecording(function(audioFile) {
+                        var mimeType = audioFile.type;
+                        var fileType = '';
+                        if (mimeType) {
+                            fileType = '.' + mimeType.substr(mimeType.lastIndexOf('/')+1);
+                        }
+                        var fileName = 'voiceRecording_' + new Date().getTime() + fileType;
+
+                        var data = new FormData();
+                        data.append("file", audioFile, fileName);
 
                         var req = new XMLHttpRequest();
                         req.onload = function(e) {
                             if (req.status == 200) {
                                 var url = JSON.parse(req.response).data.src;
-                                insert('audio[' + url + ']');
+                                insert('audio[' + url + '](' + audioLengthStr + ')');
                                 send();
                             } else {
                                 layer.msg('语音消息发送失败', {icon: 2});
@@ -324,11 +358,6 @@
                     });
                 }
             });
-        });
-
-        //绑定播放视频事件
-        $('body').on('click', '.layui-layim-video[layim-event=playVideo]', function() {
-            $('video').attr('controls', 'controls');
         });
 
         function getQueryString(name) {
@@ -400,6 +429,7 @@
                     }
                 }
                 replaceDefaultUserAvatar();
+                replaceDefaultGroupAvatar();
             }
 
             //连接关闭的回调方法
@@ -432,13 +462,50 @@
 
         function replaceDefaultGroupAvatar() {
             var defaultUrl = '/modules/layim/images/default_group_avatar.png';
-            var userAvatars = $('img[class*=layim-group], li[class*=layim-group] > img');
+            var userAvatars = $('img[class*=layim-group], li[class*=layim-group] > img, #layui-layim-min');
             $.each(userAvatars, function(i, avatar) {
                 var src = $(avatar).attr('src');
                 if (src == 'undefined') {
                     $(avatar).attr('src', defaultUrl);
                 }
             });
+        }
+
+        function openGroupChat(groups) {
+            if (groups) {
+                //默认打开url参数groupId对应的讨论组
+                var groupId= getQueryString('groupId');
+                if (groupId) {
+                    //先找到id对应的数组
+                    var group = groups.filter(function(obj) {
+                        return obj.id == groupId;
+                    })[0];
+
+                    if (group) {
+                        group.type = 'group';
+                        group.name = group.groupname;
+                        layim.chat(group);
+                        return;
+                    }
+                }
+
+                //没有传参或讨论组不存在，就打开全部讨论组
+                $.each(groups, function(i, group) {
+                    group.type = 'group';
+                    group.name = group.groupname;
+                    layim.chat(group);
+                });
+            }
+        }
+
+        function maximizeChatWindow() {
+            $('.layui-layer-max').click();
+            $('.layui-layer-maxmin').hide();
+            $('.layui-layer-close').hide();
+            $('.layim-send-close').hide();
+            $('.layui-layer-title').css('cursor', 'auto');
+            $('.layui-layer-move').css('cursor', 'auto');
+            $('.layim-chat-send .layim-menu-box').css('top', '-45px');
         }
     });
 </script>
