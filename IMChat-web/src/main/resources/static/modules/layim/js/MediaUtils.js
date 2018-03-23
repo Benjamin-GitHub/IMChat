@@ -62,12 +62,12 @@ var recorderFile, stopRecordCallback;
 var videoEnabled = false;
 
 // 录制短语音
-function startRecord(enableVideo, callback) {
+function startRecording(onSuccess, onError, enableVideo) {
     videoEnabled = enableVideo;
     MediaUtils.getUserMedia(enableVideo, true, function (err, stream) {
         if (err) {
-            if (callback) {
-                callback(err);
+            if (onError) {
+                onError(err);
             } else {
                 throw err;
             }
@@ -88,15 +88,15 @@ function startRecord(enableVideo, callback) {
             };
             recorder.start();
 
-            if (callback) {
-                callback();
+            if (onSuccess) {
+                onSuccess();
             }
         }
     });
 }
 
 // 停止录制
-function stopRecord(callback) {
+function stopRecording(callback) {
     stopRecordCallback = callback;
     // 终止录制器
     recorder.stop();

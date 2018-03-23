@@ -321,8 +321,11 @@
 
                     stopRecording(function(audioFile) {
                         var mimeType = audioFile.type;
-                        var fileType = mimeType.substr(mimeType.lastIndexOf('/')+1);
-                        var fileName = 'voiceRecording_' + new Date().getTime() + '.' + fileType;
+                        var fileType = '';
+                        if (mimeType) {
+                            fileType = '.' + mimeType.substr(mimeType.lastIndexOf('/')+1);
+                        }
+                        var fileName = 'voiceRecording_' + new Date().getTime() + fileType;
 
                         var data = new FormData();
                         data.append("file", audioFile, fileName);
