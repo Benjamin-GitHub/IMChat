@@ -1,11 +1,16 @@
 package com.ztesoft.websocket;
 
+import com.alibaba.fastjson.JSON;
+import com.aliyuncs.chatbot.model.v20171011.ChatResponse;
+import com.aliyuncs.http.FormatType;
 import com.google.gson.Gson;
 import com.ztesoft.model.im.ImGroupDto;
 import com.ztesoft.model.im.ImMessagePo;
 import com.ztesoft.model.im.ImUserDto;
 import com.ztesoft.model.websocket.*;
 import com.ztesoft.service.*;
+import com.ztesoft.util.aliyun.MessageType;
+import com.ztesoft.util.aliyun.XiaoMiUtil;
 import com.ztesoft.util.common.Constants;
 import com.ztesoft.util.seq.SequenceCreator;
 import org.apache.log4j.Logger;
@@ -30,6 +35,8 @@ public class WebSocketServer {
 
     //concurrent包的线程安全Map，用来存放每个客户端对应的MyWebSocket对象。
     private static final  ConcurrentHashMap<String,Session> userOnlineSession = new ConcurrentHashMap<>();
+
+    private static final  ConcurrentHashMap<String,String> userAliyunSession = new ConcurrentHashMap<>();
 
     private ImUserService imUserService = SpringApplicationContextFactory.getApplicationContext().getBean(ImUserServiceImpl.class)  ;
 
@@ -61,11 +68,11 @@ public class WebSocketServer {
         // 查看该用户是否有未读消息,若有则发送消息
         try {
             String message = redisService.pop(
-                    Constants.resourceBundle.getString("redis.key.unread.message") + username);
+                    Constants.sysBundle.getString("redis.key.unread.message") + username);
             while (null!=message && !"".equals(message)) {
                 sendMessage(username, message, true);
                 message = redisService.pop(
-                        Constants.resourceBundle.getString("redis.key.unread.message") + username);
+                        Constants.sysBundle.getString("redis.key.unread.message") + username);
             }
         } catch (Exception e) {
             logger.error("获取redis消息队列失败!", e);
@@ -106,8 +113,8 @@ public class WebSocketServer {
         MessageClientBo receData = gson.fromJson(message, MessageClientBo.class);
         logger.info(gson.toJson(receData));
         ImMessagePo messagePo = new ImMessagePo();
-        long  messageId = 0l;
-        long  objectId = 0l;
+        long  messageId = 0L;
+        long  objectId = 0L;
         try {
               messageId = SequenceCreator.getSequence("IM_MESSAGE_SEQ");
         } catch (Exception e) {
@@ -140,31 +147,57 @@ public class WebSocketServer {
         userData.setUsername(receData.getMine().getUsername());
         userData.setTimestamp(System.currentTimeMillis());
         if(Constants.MESSAGE_TO_TYPE_GROUP.equals(receData.getTo().getType())){
-            try {
-                List<ImUserDto> users = this.imUserService.listGroupMembersByGroupId(objectId);
-                for (ImUserDto user : users) {
-                    if(receData.getMine().getId() != user.getUserId()){
-                        userData.setMine(false);
-                        sendMessage(user.getUsername(), gson.toJson(sendBo), true);
-                    }
-                }
-            } catch (Exception e) {
-                logger.error("listGroupMembersByGroupId occur an  error !",e);
+            //群组ID是小蜜组的说明是智能问答，
+            if(objectId == Constants.CHAT_GROUP_ID){
+                String sessionId = userAliyunSession.get(username);
+                ChatResponse response = XiaoMiUtil.doAction(receData.getMine().getContent(), sessionId,FormatType.JSON);
+                sessionId = response.getSessionId();
+                userAliyunSession.put(username,sessionId);
+                try {
+                    for (ChatResponse.Message messageVo:response.getMessages()) {
+                        if(messageVo.getType().equalsIgnoreCase(MessageType.TEXT.getType())){
+                            logger.info(JSON.toJSONString(messageVo));
+                            userData.setContent(messageVo.getText().getContent());
+                        }else if(messageVo.getType().equalsIgnoreCase(MessageType.KNOWLEDGE.getType())){
+                            logger.info(JSON.toJSONString(messageVo));
+                            userData.setContent(messageVo.getKnowledge().getSummary());
+                        }else if(messageVo.getType().equalsIgnoreCase(MessageType.RECOMMEND.getType())){
+                            List<ChatResponse.Message.Recommend> recommends = messageVo.getRecommends();
+                            StringBuffer content = new StringBuffer(Constants.CHAT_RECOMMEND_DEFAULT).append("\r\n");
+                            for (int i = 0; i <recommends.size() ; i++) {
+                                content.append(recommends.get(i).getTitle()).append("\r\n");
+                            }
+                            userData.setContent(content.toString());
+                            logger.info(JSON.toJSONString(messageVo));
 
+                        }
+                    }
+                    userData.setFromid(Constants.CHAT_GROUP_ID);
+                    userData.setUsername("智能一点通");
+                    sendMessage(username,gson.toJson(sendBo),true);
+                } catch (IOException e) {
+                    logger.error("sendMessage occur an error !",e);
+                }
+            }else{
+                try {
+                    List<ImUserDto> users = this.imUserService.listGroupMembersByGroupId(objectId);
+                    for (ImUserDto user : users) {
+                        if(receData.getMine().getId() != user.getUserId()){
+                            userData.setMine(false);
+                            sendMessage(user.getUsername(), gson.toJson(sendBo), true);
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.error("listGroupMembersByGroupId occur an  error !",e);
+
+                }
             }
+
         }else{
 
         }
 
 
-       /* //群发消息
-        for (WebSocketServer item : webSocketSet) {
-            try {
-                item.sendMessage(message);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }*/
     }
 
     /**
@@ -189,10 +222,10 @@ public class WebSocketServer {
              userOnlineSession.get(username).getBasicRemote().sendText(message);
              logger.info(message);
          // 否则把消息存到redis队列中,队列名为username_userId
-         } else if (userOnlineSession.get(username)==null && storeMessage==true){
+         } else if (userOnlineSession.get(username) == null && storeMessage == true){
              try {
                  redisService.push(
-                         Constants.resourceBundle.getString("redis.key.unread.message") + username, message);
+                         Constants.sysBundle.getString("redis.key.unread.message") + username, message);
              } catch (Exception e) {
                  logger.error("消息存入redis失败",e);
              }

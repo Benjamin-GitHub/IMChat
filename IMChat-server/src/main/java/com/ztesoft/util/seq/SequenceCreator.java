@@ -4,7 +4,6 @@ package com.ztesoft.util.seq;
 import com.ztesoft.util.common.Constants;
 import com.ztesoft.websocket.SpringApplicationContextFactory;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -30,7 +29,7 @@ public class SequenceCreator {
         ThreadFactory threadFactory = new SequenceThreadFactory();
         THREAD_POOL_EXECUTOR = new ScheduledThreadPoolExecutor(1,threadFactory);
         SEQ_POOL= new ConcurrentHashMap<String, AbstractQueue<Long>>();
-        TIME_OUT_GET_SEQUENCE = Long.parseLong(Constants.resourceBundle.getString("sequence.TIME_OUT"));
+        TIME_OUT_GET_SEQUENCE = Long.parseLong(Constants.sysBundle.getString("sequence.TIME_OUT"));
     }
 
     public static ConcurrentMap<String, AbstractQueue<Long>> getSeqPool() {
@@ -41,11 +40,11 @@ public class SequenceCreator {
     public  void init(){
         logger.warn("开始初始化所有ALL SEQUENCE...");
         jdbcTemplate = SpringApplicationContextFactory.getApplicationContext().getBean(JdbcTemplate.class);
-        Set<String> seqs = Constants.resourceBundle.keySet();
+        Set<String> seqs = Constants.sysBundle.keySet();
         Iterator<String> it = seqs.iterator();
         while (it.hasNext()) {
             String key = it.next();
-            String value = Constants.resourceBundle.getString(key);
+            String value = Constants.sysBundle.getString(key);
             String[] args = value.split(",");
             if(args.length == 3 && key.startsWith("sequence")){
                 String queueName = key;
